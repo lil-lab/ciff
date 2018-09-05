@@ -30,7 +30,7 @@ Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind 
 
 **Publications**
 
-Submissions using models, data or simulators provided with CIFF.
+Publications using models, data or simulators provided with CIFF.
 
 1) Mapping Navigation Instructions to Continuous Control Actions with Position Visitation Prediction *Valts Blukis, Dipendra Misra, Ross A. Knepper, and Yoav Artzi*, [CoRL 2018]  (uses the LANI dataset)
 
