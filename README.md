@@ -8,9 +8,9 @@ Contains simulators and dataset for 3 domains for natural language instruction f
 
      a) Block World Dataset (Bisk et al. 2016): A fully-observed map for moving blocks around on a map.
 
-     b) SLUG (Bennett et al. 2017): A partially observed problem for flying drone in a open space.
+     b) LANI (Misra et al. 2018): A partially observed domain for flying drone in an open space.
 
-     c) CHALET (Misra et al. 2017): A partially observed problem for navigation and manipulation in a 3D house
+     c) CHAI (Misra et al. 2018): A partially observed domain for navigation and simple manipulation in a 3D house.
 
 The code contains experiments for training and testing various models and baselines. Includes:
 
