@@ -26,7 +26,7 @@ The code contains experiments for training and testing various models and baseli
 
 Maintained by: Dipendra Misra (dkm@cs.cornell.edu)
 
-Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Nikalson, Valts Blukis, and Yoav Artzi
+Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Niklasson, Valts Blukis, and Yoav Artzi
 
 **Publications**
 
