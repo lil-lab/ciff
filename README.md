@@ -20,7 +20,7 @@ The code contains experiments for training and testing various models and baseli
         
       c) Training algorithms like behaviour cloning, A3C, Reinforce.
 
-**Code To Come Soon:** We will release a beta version soon.
+**Code To Come Soon:** We will release a beta version soon along with data and simulators.
 
 **Credits**
 
