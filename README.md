@@ -20,7 +20,11 @@ The code contains experiments for training and testing various models and baseli
         
       c) Training algorithms like behaviour cloning, A3C, Reinforce.
 
-**Code To Come Soon:** We will release a beta version soon along with the datasets and simulators.
+**Dataset and Simulators:** Dataset and simulators are available here: https://cornell.box.com/v/emnlp2018-misra
+   
+ Test scripts for visualizing the dataset and simulators will be available on the wiki soon.
+
+**Code To Come Soon:** We will release a beta version soon.
 
 **Credits**
 
