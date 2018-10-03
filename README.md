@@ -20,7 +20,7 @@ The code contains experiments for training and testing various models and baseli
         
       c) Training algorithms like behaviour cloning, A3C, Reinforce.
 
-**Dataset and Simulators:** Dataset and simulators are available here: https://cornell.box.com/v/emnlp2018-misra
+**Dataset and Simulators:** Dataset and simulators are available here: http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/
    
  Test scripts for visualizing the dataset and simulators will be available on the wiki soon.
 
