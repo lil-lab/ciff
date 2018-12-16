@@ -14,13 +14,11 @@ Contains simulators and dataset for 3 domains for natural language instruction f
 
 The code contains experiments for training and testing various models and baselines. Includes:
 
-      a) Simple baselines like stop, random baseline, most frequent action.
+      a) Simple baselines like stop, random baseline, 
 
-      b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2018, etc.
+      b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2017, etc.
         
-      c) Training algorithms like behaviour cloning, A3C, Reinforce.
-
-**Code To Come Soon:** We will release a beta version soon along with the datasets and simulators.
+      c) Training algorithms like behaviour cloning, A3C, Reinforce etc.
 
 **Credits**
 
@@ -30,9 +28,9 @@ Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind 
 
 **Publications**
 
-Submissions using models, data or simulators provided with CIFF.
+Submissions using CIFF.
 
-1) Mapping Navigation Instructions to Continuous Control Actions with Position Visitation Prediction *Valts Blukis, Dipendra Misra, Ross A. Knepper, and Yoav Artzi*, [CoRL 2018]  (uses the LANI dataset)
+1) CoRL submission
 
 2) Mapping Instructions to Actions in 3D Environments with Visual Goal Prediction *Dipendra Misra, Andrew Bennett, Valts Blukis, Eyvind Niklasson, Max Shatkhin, and Yoav Artzi*, [EMNLP 2018]
 
@@ -41,3 +39,26 @@ Submissions using models, data or simulators provided with CIFF.
 4) Reinforcement Learning for Mapping Instructions to Actions with Reward Learning, *Dipendra Misra and Yoav Artzi*, AAAI Fall Symposium on Natural Language Communication for Human Robot Interaction. [Paper](http://www.ttic.edu/nchrc/papers/19.pdf)
 
 5) Mapping Instructions and Visual Observations to Actions with Reinforcement Learning, *Dipendra Misra, John Langford and Yoav Artzi*, EMNLP 2017. [Paper](http://www.cs.cornell.edu/~dkm/papers/mla-emnlp.2017.pdf)
+
+**How to Use**
+
+1) Clone the repostory using `git clone https://github.com/clic-lab/instruction-following-framework.git`
+
+2) Repository only contains the source code. You will have to download the data and simulators from Cornell Box. 
+https://cornell.app.box.com/folder/48719193956. Download the data and simulator folder using rclone inside the directory where your code is. (If you don't have access to Cornell Box folder, please contact Dipendra Misra at dkm@cs.cornell.edu).
+
+`rclone sync cornellbox:/data_and_simulators/data data`
+
+`rclone sync cornellbox:/data_and_simulators/simulators simulators`
+
+Your directory structure should look like:
+
+- Main directory:
+
+     - data
+     
+     - simulators
+     
+     - src
+     
+3) Run an experiment. See wiki for more details.

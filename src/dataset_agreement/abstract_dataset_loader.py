@@ -1,0 +1,2 @@
+class AbstractDatasetLoader:
+    pass
