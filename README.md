@@ -30,7 +30,7 @@ Our code is built using [PyTorch](https://pytorch.org/) which is a popular Deep 
    
  Test scripts for visualizing the dataset and simulators will be available on the wiki soon.
 
-**Note**: Touchdown dataset uses Google Streetview images that are owned by Google. Please see the Section XX in the Touchdown paper for details on how to get access to the dataset.
+**Note**: Touchdown dataset uses Google Streetview images that are owned by Google. Please see the Section 9 in the Touchdown paper for details on how to get access to the dataset.
 
 **Code Status:** An unstable release is available currently. Please follow issues for details on fixes left to be done. For any questions email Dipendra Misra at dkm@cs.cornell.edu. 
 
