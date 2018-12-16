@@ -8,9 +8,9 @@ Contains simulators and dataset for 3 domains for natural language instruction f
 
      a) Block World Dataset (Bisk et al. 2016): A fully-observed map for moving blocks around on a map.
 
-     b) SLUG (Bennett et al. 2017): A partially observed problem for flying drone in a open space.
+     b) LANI (Misra et al. 2018): A partially observed domain for flying drone in an open space.
 
-     c) CHALET (Misra et al. 2017): A partially observed problem for navigation and manipulation in a 3D house
+     c) CHAI (Misra et al. 2018): A partially observed domain for navigation and simple manipulation in a 3D house.
 
 The code contains experiments for training and testing various models and baselines. Includes:
 
@@ -18,21 +18,27 @@ The code contains experiments for training and testing various models and baseli
 
       b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2017, etc.
         
-      c) Training algorithms like behaviour cloning, A3C, Reinforce etc.
+      c) Training algorithms like behaviour cloning, A3C, Reinforce.
+
+**Dataset and Simulators:** Dataset and simulators are available here: http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/
+   
+ Test scripts for visualizing the dataset and simulators will be available on the wiki soon.
+
+**Code To Come Soon:** We will release a beta version soon.
 
 **Credits**
 
 Maintained by: Dipendra Misra (dkm@cs.cornell.edu)
 
-Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Nikalson, Valts Blukis, and Yoav Artzi
+Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Niklasson, Valts Blukis, and Yoav Artzi
 
 **Publications**
 
-Submissions using CIFF.
+Publications using models, data or simulators provided with CIFF.
 
 1) CoRL submission
 
-2) Mapping Instructions to Actions in 3D Environments with Visual Goal Prediction *Dipendra Misra, Andrew Bennett, Valts Blukis, Eyvind Niklasson, Max Shatkhin, and Yoav Artzi*, [EMNLP 2018]
+2) Mapping Instructions to Actions in 3D Environments with Visual Goal Prediction *Dipendra Misra, Andrew Bennett, Valts Blukis, Eyvind Niklasson, Max Shatkhin, and Yoav Artzi*, [EMNLP 2018](https://arxiv.org/abs/1809.00786)
 
 3) Scheduled Policy Optimization for Natural Language Communication with Intelligent Agents, *Wenhan Xiong, Xiaoxiao Guo, Mo Yu, Shiyu Chang, Bowen Zhou, William Yang Wang*, [arXiv 2018](https://arxiv.org/abs/1806.06187)
 
