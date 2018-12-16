@@ -1,50 +1,60 @@
 # Cornell Instruction Following Framework (CIFF)
 
-CIFF is intended to provide an integrated framework for developing and experimenting with various natural language instruction following framework. Currently it provides a common interface for 3 datasets and simulators, several models and learning algorithm.
+An agent following an instruction given to it by a human in natural language has remained one of the long standing goals of Artificial Intelligence going back to the work of [SHRLDU (Winograd 1968)](https://en.wikipedia.org/wiki/SHRDLU). In the last decade, several different datasets, learning environments have been released by different research groups (SAIL, LANI, Blocks, CHAI, etc.) however evaluating agents on all of them has been difficult due to different interfaces, format and configuration. This adds an unnecessary amount of engineering and as a result most research papers on instruction following evaluate on a single dataset (generally developed by their research group).
 
-**Contents of this repository**
+CIFF is intended to remove this unnecessary engineering work by providing an integrated framework for developing and experimenting with various natural language instruction following framework. Currently it provides a common interface for 4 datasets and simulators, several models and learning algorithm.
 
-Contains simulators and dataset for 3 domains for natural language instruction following: 
+**CIFF Features**
 
-     a) Block World Dataset (Bisk et al. 2016): A fully-observed map for moving blocks around on a map.
+Contains simulators and dataset for 4 domains for natural language instruction following: 
 
-     b) LANI (Misra et al. 2018): A partially observed domain for flying drone in an open space.
+     a) Block World Dataset (Bisk et al. 2016): A fully-observed map for moving blocks around on a map. Synthetic images.
 
-     c) CHAI (Misra et al. 2018): A partially observed domain for navigation and simple manipulation in a 3D house.
+     b) LANI (Misra et al. 2018): A partially observed domain for flying drone in an open space. Synthetic images.
 
-The code contains experiments for training and testing various models and baselines. Includes:
+     c) CHAI (Misra et al. 2018): A partially observed domain for navigation and simple manipulation in a 3D house. Synthetic images.
 
-      a) Simple baselines like stop, random baseline, 
+     d) Touchdown (Chen et al. 2018): A partially observed domain for navigation in Google Streetview map of Manhattan, New York City. Realistic images.
 
-      b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2017, etc.
+The code contains experiments for training and testing various models and baselines including:
+
+      a) Simple baselines like stop, random baseline and most frequent action.
+
+      b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2017, Misra et al. 2018 etc.
         
-      c) Training algorithms like behaviour cloning, A3C, Reinforce.
+      c) Training algorithms like Behaviour Cloning, A3C, Reinforce. We also provide asynchronous learning allowing training on several different environments simultaneously. 
 
-**Dataset and Simulators:** Dataset and simulators are available here: http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/
+Our code is built using [PyTorch](https://pytorch.org/) which is a popular Deep Learning library for development and allows dynamic graph building and GPU functionalities. We also provide additional logging facilities, a tensorboard class for visualization and reading hyperparameters and configurations from JSON files.
+
+**Dataset and Simulators:** Dataset and simulators for Blocks, LANI and CHAI are available here: http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/
    
  Test scripts for visualizing the dataset and simulators will be available on the wiki soon.
 
-**Code To Come Soon:** We will release a beta version soon.
+**Note**: Touchdown dataset uses Google Streetview images that are owned by Google. Please see the Section XX in the Touchdown paper for details on how to get access to the dataset.
+
+**Code Status:** An unstable release is available currently. Please follow issues for details on fixes left to be done. For any questions email Dipendra Misra at dkm@cs.cornell.edu. 
 
 **Credits**
 
 Maintained by: Dipendra Misra (dkm@cs.cornell.edu)
 
-Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Niklasson, Valts Blukis, and Yoav Artzi
+Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Niklasson, Howard Chen, Valts Blukis, and Yoav Artzi
 
 **Publications**
 
 Publications using models, data or simulators provided with CIFF.
 
-1) CoRL submission
+1) Touchdown: Natural Language Navigation and Spatial Reasoning in Visual Street Environments *Howard Chen, Alane Suhr, Dipendra Misra, Noah Snavely, Yoav Artzi*, [arXiv 2018](https://arxiv.org/pdf/1811.12354.pdf) 
 
-2) Mapping Instructions to Actions in 3D Environments with Visual Goal Prediction *Dipendra Misra, Andrew Bennett, Valts Blukis, Eyvind Niklasson, Max Shatkhin, and Yoav Artzi*, [EMNLP 2018](https://arxiv.org/abs/1809.00786)
+2) Mapping Navigation Instructions to Continuous Control Actions with Position Visitation Prediction *Valts Blukis, Dipendra Misra, Ross A. Knepper, and Yoav Artzi*, [CoRL 2018](http://www.cs.cornell.edu/~dkm/papers/bmka-corl.2018.pdf) (Uses only the LANI dataset and simulator.)
 
-3) Scheduled Policy Optimization for Natural Language Communication with Intelligent Agents, *Wenhan Xiong, Xiaoxiao Guo, Mo Yu, Shiyu Chang, Bowen Zhou, William Yang Wang*, [arXiv 2018](https://arxiv.org/abs/1806.06187)
+3) Mapping Instructions to Actions in 3D Environments with Visual Goal Prediction *Dipendra Misra, Andrew Bennett, Valts Blukis, Eyvind Niklasson, Max Shatkhin, and Yoav Artzi*, [EMNLP 2018](https://arxiv.org/abs/1809.00786)
 
-4) Reinforcement Learning for Mapping Instructions to Actions with Reward Learning, *Dipendra Misra and Yoav Artzi*, AAAI Fall Symposium on Natural Language Communication for Human Robot Interaction. [Paper](http://www.ttic.edu/nchrc/papers/19.pdf)
+4) Scheduled Policy Optimization for Natural Language Communication with Intelligent Agents, *Wenhan Xiong, Xiaoxiao Guo, Mo Yu, Shiyu Chang, Bowen Zhou, William Yang Wang*, [arXiv 2018](https://arxiv.org/abs/1806.06187) (Uses only the Blocks simulator)
 
-5) Mapping Instructions and Visual Observations to Actions with Reinforcement Learning, *Dipendra Misra, John Langford and Yoav Artzi*, EMNLP 2017. [Paper](http://www.cs.cornell.edu/~dkm/papers/mla-emnlp.2017.pdf)
+5) Reinforcement Learning for Mapping Instructions to Actions with Reward Learning, *Dipendra Misra and Yoav Artzi*, AAAI Fall Symposium on Natural Language Communication for Human Robot Interaction. [Paper](http://www.ttic.edu/nchrc/papers/19.pdf)
+
+6) Mapping Instructions and Visual Observations to Actions with Reinforcement Learning, *Dipendra Misra, John Langford and Yoav Artzi*, EMNLP 2017. [Paper](http://www.cs.cornell.edu/~dkm/papers/mla-emnlp.2017.pdf)
 
 **How to Use**
 
@@ -67,4 +77,4 @@ Your directory structure should look like:
      
      - src
      
-3) Run an experiment. See wiki for more details.
+3) Run an experiment. See Wiki for more details.
