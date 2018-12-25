@@ -4,7 +4,7 @@ An agent following an instruction given to it by a human in natural language has
 
 CIFF is intended to remove this unnecessary engineering work by providing an integrated framework for developing and experimenting with various natural language instruction following framework. Currently it provides a common interface for 4 datasets and simulators, several models and learning algorithm.
 
-**CIFF Features**
+## CIFF Features
 
 Contains simulators and dataset for 4 domains for natural language instruction following: 
 
@@ -40,7 +40,7 @@ Maintained by: Dipendra Misra (dkm@cs.cornell.edu)
 
 Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind Niklasson, Howard Chen, Valts Blukis, and Yoav Artzi
 
-**Publications**
+## Publications
 
 Publications using models, data or simulators provided with CIFF.
 
@@ -56,20 +56,15 @@ Publications using models, data or simulators provided with CIFF.
 
 6) Mapping Instructions and Visual Observations to Actions with Reinforcement Learning, *Dipendra Misra, John Langford and Yoav Artzi*, EMNLP 2017. [Paper](http://www.cs.cornell.edu/~dkm/papers/mla-emnlp.2017.pdf)
 
-**How to Use**
+## How to Use CIFF
 
 1) Clone the repostory using `git clone https://github.com/clic-lab/instruction-following-framework.git`
 
-2) Repository only contains the source code. You will have to download the data and simulators from Cornell Box. 
-https://cornell.app.box.com/folder/48719193956. Download the data and simulator folder using rclone inside the directory where your code is. (If you don't have access to Cornell Box folder, please contact Dipendra Misra at dkm@cs.cornell.edu).
+2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details.
 
-`rclone sync cornellbox:/data_and_simulators/data data`
+Place the data and simulator files in the same ciff folder alongside the src folder. Your directory structure should look like:
 
-`rclone sync cornellbox:/data_and_simulators/simulators simulators`
-
-Your directory structure should look like:
-
-- Main directory:
+- ./ciff/
 
      - data
      
@@ -77,4 +72,14 @@ Your directory structure should look like:
      
      - src
      
-3) Run an experiment. See [Wiki for more details](https://github.com/clic-lab/ciff/wiki).
+3) Set PYTHONENV to treat the src folder as root. One way to do this is to run:
+ 
+   `export PYTHONPATH=$PYTHONPATH:./src/`
+
+4) Run an experiment. This is essentially done by running a file as:
+
+   `python3 src/experiment_domain_name/experiment_name.py`
+
+   where `domain_name` is the name of the domain (e.g., nav_drone for LANI, house for CHAI, streetview for touchdown, blocks for blocks) and `experiment_name` is the name of the experiment you want to run.
+
+For details on experiments see the [Wiki](https://github.com/clic-lab/ciff/wiki).
