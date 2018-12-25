@@ -44,7 +44,7 @@ Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind 
 
 Publications using models, data or simulators provided with CIFF.
 
-1) Touchdown: Natural Language Navigation and Spatial Reasoning in Visual Street Environments *Howard Chen, Alane Suhr, Dipendra Misra, Noah Snavely, Yoav Artzi*, [arXiv 2018](https://arxiv.org/pdf/1811.12354.pdf) 
+1) Touchdown: Natural Language Navigation and Spatial Reasoning in Visual Street Environments *Howard Chen, Alane Suhr, Dipendra Misra, Noah Snavely, Yoav Artzi*, [arXiv 2018](https://arxiv.org/pdf/1811.12354.pdf)  (Uses CIFF for navigation baselines)
 
 2) Mapping Navigation Instructions to Continuous Control Actions with Position Visitation Prediction *Valts Blukis, Dipendra Misra, Ross A. Knepper, and Yoav Artzi*, [CoRL 2018](http://www.cs.cornell.edu/~dkm/papers/bmka-corl.2018.pdf) (Uses only the LANI dataset and simulator.)
 
@@ -77,4 +77,4 @@ Your directory structure should look like:
      
      - src
      
-3) Run an experiment. See Wiki for more details.
+3) Run an experiment. See [Wiki for more details](https://github.com/clic-lab/ciff/wiki).
