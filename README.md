@@ -60,9 +60,7 @@ Publications using models, data or simulators provided with CIFF.
 
 1) Clone the repostory using `git clone https://github.com/clic-lab/instruction-following-framework.git`
 
-2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details.
-
-Place the data and simulator files in the same ciff folder alongside the src folder. Your directory structure should look like:
+2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details. Place the data and simulator files in the same ciff folder alongside the src folder. Your directory structure should look like:
 
 - ./ciff/
 
