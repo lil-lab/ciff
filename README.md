@@ -11,7 +11,6 @@ Contains simulators and dataset for 4 domains for natural language instruction f
 <img src="media/blocks.png" alt="Blocks" height="150"> | <img src="media/lani.png" alt="LANI" height="150">   
 --- | --- 
 Block World Dataset (Bisk et al. 2016) | LANI (Misra et al. 2018)
---- | ---
 <img src="media/chai.png" alt="CHAI" height="150">  | <img src="media/touchdown.png" alt="alt text" height="150"> 
 --- | --- 
 CHAI (Misra et al. 2018) | Touchdown (Chen et al. 2018)
