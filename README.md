@@ -10,9 +10,9 @@ Contains simulators and dataset for 4 domains for natural language instruction f
 
 |<img src="media/blocks.png" alt="Blocks" height="150"> | <img src="media/lani.png" alt="LANI" height="150">  | 
 |--- | --- |
-| 1. Block World Dataset (Bisk et al. 2016) | 2. LANI (Misra et al. 2018) |
+| 1. [Block World Dataset (Bisk et al. 2016)](http://yonatanbisk.com/papers/2016-NAACL.pdf) | 2. [LANI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) |
 |<img src="media/chai.png" alt="CHAI" height="150">  | <img src="media/touchdown.png" alt="alt text" height="150"> |
-| 3. CHAI (Misra et al. 2018) | 4. Touchdown (Chen et al. 2018)|
+| 3. [CHAI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) | 4. [Touchdown (Chen et al. 2018)](https://arxiv.org/abs/1811.12354)|
 
 
 The code contains experiments for training and testing various models and baselines including:
@@ -68,6 +68,8 @@ Publications using models, data or simulators provided with CIFF.
      - simulators
      
      - src
+     
+     - media
      
 3) Set PYTHONENV to treat the src folder as root. One way to do this is to run:
  
