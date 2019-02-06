@@ -10,9 +10,9 @@ Contains simulators and dataset for 4 domains for natural language instruction f
 
 |<img src="media/blocks.png" alt="Blocks" height="150"> | <img src="media/lani.png" alt="LANI" height="150">  | 
 |--- | --- |
-| 1. [Block World Dataset (Bisk et al. 2016)](http://yonatanbisk.com/papers/2016-NAACL.pdf) | 2. [LANI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) |
+| 1. [Block World Dataset (Bisk et al. 2016)](http://yonatanbisk.com/papers/2016-NAACL.pdf)<br/> An 2D domain with full observability. Instructions ask the agent to manipulate blocks on a map. | 2. [LANI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) <br/> A partially observed 3D domain for navigating in an open landscape based on instructions. |
 |<img src="media/chai.png" alt="CHAI" height="150">  | <img src="media/touchdown.png" alt="alt text" height="150"> |
-| 3. [CHAI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) | 4. [Touchdown (Chen et al. 2018)](https://arxiv.org/abs/1811.12354)|
+| 3. [CHAI (Misra et al. 2018)](http://cs.cornell.edu/~dkm/papers/mbbnsa-emnlp.2018.pdf) <br/> A partially observed 3D domain for navigation and manipulation in a house based on instructions. | 4. [Touchdown (Chen et al. 2018)](https://arxiv.org/abs/1811.12354) A partially observed domain with real images for navigating in Google StreetView map of Manhattan based on instructions. |
 
 
 The code contains experiments for training and testing various models and baselines including:
