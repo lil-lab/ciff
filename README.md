@@ -8,13 +8,14 @@ CIFF is intended to remove this unnecessary engineering work by providing an int
 
 Contains simulators and dataset for 4 domains for natural language instruction following: 
 
-     a) Block World Dataset (Bisk et al. 2016): A fully-observed map for moving blocks around on a map. Synthetic images.
+<img src="media/blocks.png" alt="Blocks" height="150"> | <img src="media/lani.png" alt="LANI" height="150">   
+--- | --- 
+Block World Dataset (Bisk et al. 2016) | LANI (Misra et al. 2018)
+--- | ---
+<img src="media/chai.png" alt="CHAI" height="150">  | <img src="media/touchdown.png" alt="alt text" height="150"> 
+--- | --- 
+CHAI (Misra et al. 2018) | Touchdown (Chen et al. 2018)
 
-     b) LANI (Misra et al. 2018): A partially observed domain for flying drone in an open space. Synthetic images.
-
-     c) CHAI (Misra et al. 2018): A partially observed domain for navigation and simple manipulation in a 3D house. Synthetic images.
-
-     d) Touchdown (Chen et al. 2018): A partially observed domain for navigation in Google Streetview map of Manhattan, New York City. Realistic images.
 
 The code contains experiments for training and testing various models and baselines including:
 
