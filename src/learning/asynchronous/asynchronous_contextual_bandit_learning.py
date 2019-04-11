@@ -29,15 +29,9 @@ class AsynchronousContextualBandit(AbstractLearning):
         self.constants = constants
         self.tensorboard = tensorboard
         self.entropy = None
-        self.cross_entropy = None
-        self.ratio = None
-        self.epoch = 0
         self.entropy_coef = constants["entropy_coefficient"]
 
-        self.image_channels, self.image_height, self.image_width = shared_model.image_module.get_final_dimension()
-
-        self.optimizer = optim.Adam(shared_model.get_parameters(),
-                                    lr=constants["learning_rate"])
+        self.optimizer = optim.Adam(shared_model.get_parameters(), lr=constants["learning_rate"])
         AbstractLearning.__init__(self, self.shared_model, self.local_model, self.calc_loss,
                                   self.optimizer, self.config, self.constants, self.tensorboard)
 
@@ -47,13 +41,11 @@ class AsynchronousContextualBandit(AbstractLearning):
         immediate_rewards = []
         action_batch = []
         log_probabilities = []
-        factor_entropy = []
         for replay_item in batch_replay_items:
             agent_observation_state_ls.append(replay_item.get_agent_observed_state())
             action_batch.append(replay_item.get_action())
             immediate_rewards.append(replay_item.get_reward())
             log_probabilities.append(replay_item.get_log_prob())
-            factor_entropy.append(replay_item.get_factor_entropy())
 
         log_probabilities = torch.cat(log_probabilities)
         action_batch = cuda_var(torch.from_numpy(np.array(action_batch)))
@@ -65,9 +57,8 @@ class AsynchronousContextualBandit(AbstractLearning):
         model_prob_batch = torch.exp(model_log_prob_batch)
 
         self.entropy = -torch.sum(torch.sum(model_log_prob_batch * model_prob_batch, 1))
-        objective = torch.sum(reward_log_probs) # / num_states
-        entropy_coef = max(0, self.entropy_coef - self.epoch * 0.01)
-        loss = -objective - entropy_coef * self.entropy
+        objective = torch.sum(reward_log_probs)
+        loss = -objective - self.entropy_coef * self.entropy
 
         return loss
 

@@ -29,11 +29,9 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         self.constants = constants
         self.tensorboard = tensorboard
         self.entropy = None
-        self.cross_entropy = None
         self.entropy_coef = constants["entropy_coefficient"]
 
-        self.optimizer = optim.Adam(shared_model.get_parameters(),
-                                    lr=constants["learning_rate"])
+        self.optimizer = optim.Adam(shared_model.get_parameters(), lr=constants["learning_rate"])
         AbstractLearning.__init__(self, self.shared_model, self.local_model, self.calc_loss,
                                   self.optimizer, self.config, self.constants, self.tensorboard)
 
@@ -43,36 +41,25 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         immediate_rewards = []
         action_batch = []
         log_probabilities = []
-        factor_entropy = []
         for replay_item in batch_replay_items:
             agent_observation_state_ls.append(replay_item.get_agent_observed_state())
             action_batch.append(replay_item.get_action())
             immediate_rewards.append(replay_item.get_reward())
             log_probabilities.append(replay_item.get_log_prob())
-            factor_entropy.append(replay_item.get_factor_entropy())
 
         log_probabilities = torch.cat(log_probabilities)
         action_batch = cuda_var(torch.from_numpy(np.array(action_batch)))
         immediate_rewards = cuda_var(torch.from_numpy(np.array(immediate_rewards)).float())
 
-        num_states = int(action_batch.size()[0])
         model_log_prob_batch = log_probabilities
-        # model_log_prob_batch = self.model.get_probs_batch(agent_observation_state_ls)
         chosen_log_probs = model_log_prob_batch.gather(1, action_batch.view(-1, 1))
         reward_log_probs = immediate_rewards * chosen_log_probs.view(-1)
-
-        # gold_distribution = cuda_var(torch.FloatTensor([0.6719, 0.1457, 0.1435, 0.0387]))
         model_prob_batch = torch.exp(model_log_prob_batch)
-        mini_batch_action_distribution = torch.mean(model_prob_batch, 0)
 
-        # self.cross_entropy = -torch.sum(gold_distribution * torch.log(mini_batch_action_distribution))
         self.entropy = -torch.sum(torch.sum(model_log_prob_batch * model_prob_batch, 1))
         objective = torch.sum(reward_log_probs)
-        # Essentially we want the objective to increase and cross entropy to decrease
         loss = -objective - self.entropy_coef * self.entropy
-        self.ratio = torch.abs(objective)/(self.entropy_coef * self.entropy)  # we want the ratio to be high
 
-        # loss = -objective + self.entropy_coef * self.cross_entropy
         return loss
 
     @staticmethod
@@ -254,7 +241,5 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
 
             if tune_dataset_size > 0:
                 # Test on tuning data
-                print ("Going for testing")
                 tmp_agent.test(tune_dataset, vocab, tensorboard=tensorboard,
                            logger=logger, pushover_logger=pushover_logger)
-                print ("Done testing")
