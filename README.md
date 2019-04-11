@@ -21,7 +21,8 @@ The code contains experiments for training and testing various models and baseli
 
       b) Models like Misra et al. 2017, Gated Attention Chaplot et al. 2017, Misra et al. 2018 etc.
         
-      c) Training algorithms like Behaviour Cloning, A3C, Reinforce. We also provide asynchronous learning allowing training on several different environments simultaneously. 
+      c) Training algorithms like Behaviour Cloning, A3C, Reinforce. 
+         We also provide asynchronous learning for training on several different environments in parallel. 
 
 Our code is built using [PyTorch](https://pytorch.org/) which is a popular Deep Learning library for development and allows dynamic graph building and GPU functionalities. We also provide additional logging facilities, a tensorboard class for visualization and reading hyperparameters and configurations from JSON files.
 
