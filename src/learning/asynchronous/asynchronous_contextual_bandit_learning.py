@@ -126,13 +126,10 @@ class AsynchronousContextualBandit(AbstractLearning):
         for epoch in range(1, max_epochs + 1):
 
             learner.epoch = epoch
-            task_completion_accuracy = 0
-            mean_stop_dist_error = 0
-            stop_dist_errors = []
+
             for data_point_ix, data_point in enumerate(train_dataset):
 
                 # Sync with the shared model
-                # local_model.load_state_dict(shared_model.state_dict())
                 local_model.load_from_state_dict(shared_model.get_state_dict())
 
                 if (data_point_ix + 1) % 100 == 0:
@@ -144,17 +141,14 @@ class AsynchronousContextualBandit(AbstractLearning):
 
                 image, metadata = agent.server.reset_receive_feedback(data_point)
 
-                pose = int(metadata["y_angle"] / 15.0)
-                position_orientation = (metadata["x_pos"], metadata["z_pos"],
-                                        metadata["y_angle"])
                 state = AgentObservedState(instruction=data_point.instruction,
                                            config=config,
                                            constants=constants,
                                            start_image=image,
                                            previous_action=None,
-                                           pose=pose,
-                                           position_orientation=position_orientation,
                                            data_point=data_point)
+                meta_data_util.state_update_metadata(state, metadata)
+
                 model_state = None
                 batch_replay_items = []
                 total_reward = 0
@@ -179,21 +173,12 @@ class AsynchronousContextualBandit(AbstractLearning):
                     image, reward, metadata = agent.server.send_action_receive_feedback(action)
 
                     # Store it in the replay memory list
-                    replay_item = ReplayMemoryItem(state, action, reward,
-                                                   log_prob=log_probabilities, volatile=volatile)
+                    replay_item = ReplayMemoryItem(state, action, reward, log_prob=log_probabilities, volatile=volatile)
                     batch_replay_items.append(replay_item)
 
                     # Update the agent state
-                    pose = int(metadata["y_angle"] / 15.0)
-                    position_orientation = (metadata["x_pos"],
-                                            metadata["z_pos"],
-                                            metadata["y_angle"])
-                    state = state.update(
-                        image, action, pose=pose,
-                        position_orientation=position_orientation,
-                        data_point=data_point)
-                    state.goal = GoalPrediction.get_goal_location(metadata, data_point,
-                                                                  learner.image_height, learner.image_width)
+                    state = state.update(image, action, data_point=data_point)
+                    meta_data_util.state_update_metadata(state, metadata)
 
                     num_actions += 1
                     total_reward += reward
@@ -202,26 +187,17 @@ class AsynchronousContextualBandit(AbstractLearning):
                 image, reward, metadata = agent.server.halt_and_receive_feedback()
                 total_reward += reward
 
-                if metadata["stop_dist_error"] < 5.0:
-                    task_completion_accuracy += 1
-                mean_stop_dist_error += metadata["stop_dist_error"]
-                stop_dist_errors.append(metadata["stop_dist_error"])
-
                 if tensorboard is not None:
-                    tensorboard.log_all_train_errors(
-                        metadata["edit_dist_error"], metadata["closest_dist_error"], metadata["stop_dist_error"])
+                    meta_data_util.state_update_metadata(tensorboard, metadata)
 
                 # Store it in the replay memory list
                 if not forced_stop:
                     replay_item = ReplayMemoryItem(state, action_space.get_stop_action_index(),
-                                                   reward, log_prob=log_probabilities, volatile=volatile, goal=None)
+                                                   reward, log_prob=log_probabilities, volatile=volatile)
                     batch_replay_items.append(replay_item)
 
-                # Update the scores based on meta_data
-                # self.meta_data_util.log_results(metadata)
-
                 # Perform update
-                if len(batch_replay_items) > 0:  # 32:
+                if len(batch_replay_items) > 0:
                     loss_val = learner.do_update(batch_replay_items)
 
                     if tensorboard is not None:
@@ -233,13 +209,6 @@ class AsynchronousContextualBandit(AbstractLearning):
             # Save the model
             local_model.save_model(experiment + "/contextual_bandit_" + str(rank) + "_epoch_" + str(epoch))
             logger.log("Training data action counts %r" % action_counts)
-            mean_stop_dist_error = mean_stop_dist_error / float(len(train_dataset))
-            task_completion_accuracy = (task_completion_accuracy * 100.0)/float(len(train_dataset))
-            logger.log("Training: Mean stop distance error %r" % mean_stop_dist_error)
-            logger.log("Training: Task completion accuracy %r " % task_completion_accuracy)
-            bins = range(0, 80, 3)  # range of distance
-            histogram, _ = np.histogram(stop_dist_errors, bins)
-            logger.log("Histogram of train errors %r " % histogram)
 
             if tune_dataset_size > 0:
                 # Test on tuning data

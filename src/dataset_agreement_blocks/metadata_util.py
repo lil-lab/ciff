@@ -13,3 +13,9 @@ class MetaDataUtil(AbstractMetaDataUtil):
             logger.log(metadata)
         else:
             logging.info(metadata)
+
+    def state_update_metadata(self, state, metadata):
+        pass
+
+    def tensorboard_using_metadata(self, tensorboard, metadata):
+        pass

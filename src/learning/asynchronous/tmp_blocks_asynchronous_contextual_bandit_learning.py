@@ -148,7 +148,6 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
             for data_point_ix, data_point in enumerate(train_dataset):
 
                 # Sync with the shared model
-                # local_model.load_state_dict(shared_model.state_dict())
                 local_model.load_from_state_dict(shared_model.get_state_dict())
 
                 if (data_point_ix + 1) % 100 == 0:
@@ -156,20 +155,18 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                     logger.log("Training data action counts %r" % action_counts)
 
                 num_actions = 0
-                # max_num_actions = len(data_point.get_trajectory())
-                # max_num_actions += self.constants["max_extra_horizon"]
-                max_num_actions = constants["horizon"] + 5
+                max_num_actions = constants["horizon"] + constants["max_extra_horizon"]
 
                 image, metadata = tmp_agent.server.reset_receive_feedback(data_point)
                 instruction = TmpAsynchronousContextualBandit.convert_text_to_indices(metadata["instruction"], vocab)
 
-                # Pose and Orientation gone TODO change 3
                 state = AgentObservedState(instruction=instruction,
                                            config=config,
                                            constants=constants,
                                            start_image=image,
                                            previous_action=None,
                                            data_point=data_point)
+                meta_data_util.state_update_metadata(state, metadata)
 
                 model_state = None
                 batch_replay_items = []
@@ -179,7 +176,7 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                 while num_actions < max_num_actions:
 
                     # Sample action using the policy
-                    log_probabilities, model_state, image_emb_seq, state_feature = \
+                    log_probabilities, model_state, image_emb_seq, volatile = \
                         local_model.get_probs(state, model_state)
                     probabilities = list(torch.exp(log_probabilities.data))[0]
 
@@ -195,13 +192,12 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                     image, reward, metadata = tmp_agent.server.send_action_receive_feedback(action)
 
                     # Store it in the replay memory list
-                    replay_item = ReplayMemoryItem(state, action, reward, log_prob=log_probabilities)
+                    replay_item = ReplayMemoryItem(state, action, reward, log_prob=log_probabilities, volatile=volatile)
                     batch_replay_items.append(replay_item)
 
                     # Update the agent state
-                    # Pose and orientation gone, TODO change 4
-                    state = state.update(
-                        image, action, data_point=data_point)
+                    state = state.update(image, action, data_point=data_point)
+                    meta_data_util.state_update_metadata(state, metadata)
 
                     num_actions += 1
                     total_reward += reward
@@ -210,29 +206,23 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                 image, reward, metadata = tmp_agent.server.halt_and_receive_feedback()
                 total_reward += reward
 
-                # if tensorboard is not None:
-                #     tensorboard.log_all_train_errors(
-                #         metadata["edit_dist_error"], metadata["closest_dist_error"], metadata["stop_dist_error"])
+                if tensorboard is not None:
+                    meta_data_util.state_update_metadata(tensorboard, metadata)
 
                 # Store it in the replay memory list
                 if not forced_stop:
                     replay_item = ReplayMemoryItem(state, action_space.get_stop_action_index(),
-                                                   reward, log_prob=log_probabilities)
+                                                   reward, log_prob=log_probabilities, volatile=volatile)
                     batch_replay_items.append(replay_item)
 
-                # Update the scores based on meta_data
-                # self.meta_data_util.log_results(metadata)
-
                 # Perform update
-                if len(batch_replay_items) > 0:  # 32
+                if len(batch_replay_items) > 0:
                     loss_val = learner.do_update(batch_replay_items)
 
                     if tensorboard is not None:
-                        tensorboard.log_scalar("loss", loss_val)
                         entropy = float(learner.entropy.data[0])/float(num_actions + 1)
+                        tensorboard.log_scalar("loss", loss_val)
                         tensorboard.log_scalar("entropy", entropy)
-                        ratio = float(learner.ratio.data[0])
-                        tensorboard.log_scalar("Abs_objective_to_entropy_ratio", ratio)
                         tensorboard.log_scalar("total_reward", total_reward)
 
             # Save the model
