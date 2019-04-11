@@ -6,18 +6,11 @@ import utils.generic_policy as gp
 import numpy as np
 import nltk
 
+from utils.cuda import cuda_var
 from agents.agent_observed_state import AgentObservedState
 from agents.replay_memory_item import ReplayMemoryItem
 from agents.tmp_agent import TmpBlockAgent
-from learning.auxiliary_objective.goal_prediction import GoalPrediction
-from learning.auxiliary_objective.object_detection import ObjectDetection
-from learning.auxiliary_objective.symbolic_language_prediction import SymbolicLanguagePrediction
 from learning.asynchronous.abstract_learning import AbstractLearning
-from learning.auxiliary_objective.action_prediction import ActionPrediction
-from learning.auxiliary_objective.temporal_autoencoder import TemporalAutoEncoder
-from utils.cuda import cuda_var
-from models.incremental_model.incremental_model_recurrent_implicit_factorization_resnet import \
-    IncrementalModelRecurrentImplicitFactorizationResnet
 from utils.launch_unity import launch_k_unity_builds
 from utils.pushover_logger import PushoverLogger
 from utils.tensorboard import Tensorboard
@@ -38,23 +31,6 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         self.entropy = None
         self.cross_entropy = None
         self.entropy_coef = constants["entropy_coefficient"]
-
-        # Auxiliary Objectives
-        if self.config["do_action_prediction"]:
-            self.action_prediction_loss_calculator = ActionPrediction(self.local_model)
-            self.action_prediction_loss = None
-        if self.config["do_temporal_autoencoding"]:
-            self.temporal_autoencoder_loss_calculator = TemporalAutoEncoder(self.local_model)
-            self.temporal_autoencoder_loss = None
-        if self.config["do_object_detection"]:
-            self.object_detection_loss_calculator = ObjectDetection(self.local_model, num_objects=67)
-            self.object_detection_loss = None
-        if self.config["do_symbolic_language_prediction"]:
-            self.symbolic_language_prediction_loss_calculator = SymbolicLanguagePrediction(self.local_model)
-            self.symbolic_language_prediction_loss = None
-        if self.config["do_goal_prediction"]:
-            self.goal_prediction_calculator = GoalPrediction(self.local_model)
-            self.goal_prediction_loss = None
 
         self.optimizer = optim.Adam(shared_model.get_parameters(),
                                     lr=constants["learning_rate"])
@@ -97,62 +73,12 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         self.ratio = torch.abs(objective)/(self.entropy_coef * self.entropy)  # we want the ratio to be high
 
         # loss = -objective + self.entropy_coef * self.cross_entropy
-
-        # Minimize the Factor Entropy if the model is implicit factorization model
-        if isinstance(self.local_model, IncrementalModelRecurrentImplicitFactorizationResnet):
-            self.mean_factor_entropy = torch.mean(torch.cat(factor_entropy))
-            loss = loss + self.mean_factor_entropy
-        else:
-            self.mean_factor_entropy = None
-
-        if self.config["do_action_prediction"]:
-            self.action_prediction_loss = self.action_prediction_loss_calculator.calc_loss(batch_replay_items)
-            if self.action_prediction_loss is not None:
-                self.action_prediction_loss = self.constants["action_prediction_coeff"] * self.action_prediction_loss
-                loss = loss + self.action_prediction_loss
-        else:
-            self.action_prediction_loss = None
-
-        if self.config["do_temporal_autoencoding"]:
-            self.temporal_autoencoder_loss = self.temporal_autoencoder_loss_calculator.calc_loss(batch_replay_items)
-            if self.temporal_autoencoder_loss is not None:
-                self.temporal_autoencoder_loss = \
-                    self.constants["temporal_autoencoder_coeff"] * self.temporal_autoencoder_loss
-                loss = loss + self.temporal_autoencoder_loss
-        else:
-            self.temporal_autoencoder_loss = None
-
-        if self.config["do_object_detection"]:
-            self.object_detection_loss = self.object_detection_loss_calculator.calc_loss(batch_replay_items)
-            self.object_detection_loss = self.constants["object_detection_coeff"] * self.object_detection_loss
-            loss = loss + self.object_detection_loss
-        else:
-            self.object_detection_loss = None
-
-        if self.config["do_symbolic_language_prediction"]:
-            self.symbolic_language_prediction_loss = \
-                self.symbolic_language_prediction_loss_calculator.calc_loss(batch_replay_items)
-            self.symbolic_language_prediction_loss = self.constants["symbolic_language_prediction_coeff"] * \
-                                                     self.symbolic_language_prediction_loss
-            loss = loss + self.symbolic_language_prediction_loss
-        else:
-            self.symbolic_language_prediction_loss = None
-
-        if self.config["do_goal_prediction"]:
-            self.goal_prediction_loss = self.goal_prediction_calculator.calc_loss(batch_replay_items)
-            self.goal_prediction_loss = self.constants["goal_prediction_coeff"] * \
-                                        self.goal_prediction_loss
-            loss = loss + self.goal_prediction_loss
-        else:
-            self.goal_prediction_loss = None
-
         return loss
 
     @staticmethod
     def convert_text_to_indices(text, vocab, ignore_case=True):
 
         # Tokenize the text
-        print ("instruction ", text)
         token_seq = nltk.word_tokenize(text)
 
         indices = []
@@ -183,11 +109,11 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
             traceback.print_exception(*exc_info)
 
     @staticmethod
-    def do_train_(shared_model, config, action_space, meta_data_util, constants,
+    def do_train_(simulator_file, shared_model, config, action_space, meta_data_util, constants,
                   train_dataset, tune_dataset, experiment, experiment_name, rank, server,
                   logger, model_type, vocab, use_pushover=False):
 
-        launch_k_unity_builds([config["port"]], "./simulators/blocks/retro_linux_build.x86_64")
+        launch_k_unity_builds([config["port"]], simulator_file)
         server.initialize_server()
 
         # Test policy
@@ -313,37 +239,14 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                 # Perform update
                 if len(batch_replay_items) > 0:  # 32
                     loss_val = learner.do_update(batch_replay_items)
-                    # self.action_prediction_loss_calculator.predict_action(batch_replay_items)
-                    # del batch_replay_items[:]  # in place list clear
 
                     if tensorboard is not None:
-                        # cross_entropy = float(learner.cross_entropy.data[0])
-                        # tensorboard.log(cross_entropy, loss_val, 0)
                         tensorboard.log_scalar("loss", loss_val)
                         entropy = float(learner.entropy.data[0])/float(num_actions + 1)
                         tensorboard.log_scalar("entropy", entropy)
                         ratio = float(learner.ratio.data[0])
                         tensorboard.log_scalar("Abs_objective_to_entropy_ratio", ratio)
                         tensorboard.log_scalar("total_reward", total_reward)
-
-                        if learner.action_prediction_loss is not None:
-                            action_prediction_loss = float(learner.action_prediction_loss.data[0])
-                            learner.tensorboard.log_action_prediction_loss(action_prediction_loss)
-                        if learner.temporal_autoencoder_loss is not None:
-                            temporal_autoencoder_loss = float(learner.temporal_autoencoder_loss.data[0])
-                            tensorboard.log_temporal_autoencoder_loss(temporal_autoencoder_loss)
-                        if learner.object_detection_loss is not None:
-                            object_detection_loss = float(learner.object_detection_loss.data[0])
-                            tensorboard.log_object_detection_loss(object_detection_loss)
-                        if learner.symbolic_language_prediction_loss is not None:
-                            symbolic_language_prediction_loss = float(learner.symbolic_language_prediction_loss.data[0])
-                            tensorboard.log_scalar("sym_language_prediction_loss", symbolic_language_prediction_loss)
-                        if learner.goal_prediction_loss is not None:
-                            goal_prediction_loss = float(learner.goal_prediction_loss.data[0])
-                            tensorboard.log_scalar("goal_prediction_loss", goal_prediction_loss)
-                        if learner.mean_factor_entropy is not None:
-                            mean_factor_entropy = float(learner.mean_factor_entropy.data[0])
-                            tensorboard.log_factor_entropy_loss(mean_factor_entropy)
 
             # Save the model
             local_model.save_model(experiment + "/contextual_bandit_" + str(rank) + "_epoch_" + str(epoch))

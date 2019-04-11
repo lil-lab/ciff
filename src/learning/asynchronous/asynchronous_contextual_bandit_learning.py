@@ -1,23 +1,15 @@
 import sys
 import traceback
-
-import time
 import torch
 import torch.optim as optim
 import utils.generic_policy as gp
 import numpy as np
-import random
 
 from agents.agent import Agent
 from agents.agent_observed_state import AgentObservedState
 from agents.replay_memory_item import ReplayMemoryItem
 from learning.auxiliary_objective.goal_prediction import GoalPrediction
-from learning.auxiliary_objective.object_detection import ObjectDetection
-from learning.auxiliary_objective.object_pixel_identification import ObjectPixelIdentification
-from learning.auxiliary_objective.symbolic_language_prediction import SymbolicLanguagePrediction
 from learning.asynchronous.abstract_learning import AbstractLearning
-from learning.auxiliary_objective.action_prediction import ActionPrediction
-from learning.auxiliary_objective.temporal_autoencoder import TemporalAutoEncoder
 from utils.cuda import cuda_var
 from utils.launch_unity import launch_k_unity_builds
 from utils.pushover_logger import PushoverLogger
@@ -44,25 +36,6 @@ class AsynchronousContextualBandit(AbstractLearning):
 
         self.image_channels, self.image_height, self.image_width = shared_model.image_module.get_final_dimension()
 
-        # Auxiliary Objectives
-        if self.config["do_action_prediction"]:
-            self.action_prediction_loss_calculator = ActionPrediction(self.local_model)
-            self.action_prediction_loss = None
-        if self.config["do_temporal_autoencoding"]:
-            self.temporal_autoencoder_loss_calculator = TemporalAutoEncoder(self.local_model)
-            self.temporal_autoencoder_loss = None
-        if self.config["do_object_detection"]:
-            self.object_detection_loss_calculator = ObjectPixelIdentification(
-                self.local_model, num_objects=67, camera_angle=60, image_height=self.image_height,
-                image_width=self.image_width, object_height=0)  # -2.5)
-            self.object_detection_loss = None
-        if self.config["do_symbolic_language_prediction"]:
-            self.symbolic_language_prediction_loss_calculator = SymbolicLanguagePrediction(self.local_model)
-            self.symbolic_language_prediction_loss = None
-        if self.config["do_goal_prediction"]:
-            self.goal_prediction_calculator = GoalPrediction(self.local_model, self.image_height, self.image_width)
-            self.goal_prediction_loss = None
-
         self.optimizer = optim.Adam(shared_model.get_parameters(),
                                     lr=constants["learning_rate"])
         AbstractLearning.__init__(self, self.shared_model, self.local_model, self.calc_loss,
@@ -86,69 +59,15 @@ class AsynchronousContextualBandit(AbstractLearning):
         action_batch = cuda_var(torch.from_numpy(np.array(action_batch)))
         immediate_rewards = cuda_var(torch.from_numpy(np.array(immediate_rewards)).float())
 
-        num_states = int(action_batch.size()[0])
         model_log_prob_batch = log_probabilities
-        # model_log_prob_batch = self.model.get_probs_batch(agent_observation_state_ls)
         chosen_log_probs = model_log_prob_batch.gather(1, action_batch.view(-1, 1))
         reward_log_probs = immediate_rewards * chosen_log_probs.view(-1)
-
-        gold_distribution = cuda_var(torch.FloatTensor([0.6719, 0.1457, 0.1435, 0.0387]))
         model_prob_batch = torch.exp(model_log_prob_batch)
-        mini_batch_action_distribution = torch.mean(model_prob_batch, 0)
 
-        self.cross_entropy = -torch.sum(gold_distribution * torch.log(mini_batch_action_distribution))
-        # self.entropy = -torch.mean(torch.sum(model_log_prob_batch * model_prob_batch, 1))
         self.entropy = -torch.sum(torch.sum(model_log_prob_batch * model_prob_batch, 1))
         objective = torch.sum(reward_log_probs) # / num_states
-        # Essentially we want the objective to increase and cross entropy to decrease
         entropy_coef = max(0, self.entropy_coef - self.epoch * 0.01)
         loss = -objective - entropy_coef * self.entropy
-        self.ratio = torch.abs(objective)/(entropy_coef * self.entropy)  # we want the ratio to be high
-
-        # loss = -objective + self.entropy_coef * self.cross_entropy
-
-        if self.config["do_action_prediction"]:
-            self.action_prediction_loss = self.action_prediction_loss_calculator.calc_loss(batch_replay_items)
-            if self.action_prediction_loss is not None:
-                self.action_prediction_loss = self.constants["action_prediction_coeff"] * self.action_prediction_loss
-                loss = loss + self.action_prediction_loss
-        else:
-            self.action_prediction_loss = None
-
-        if self.config["do_temporal_autoencoding"]:
-            self.temporal_autoencoder_loss = self.temporal_autoencoder_loss_calculator.calc_loss(batch_replay_items)
-            if self.temporal_autoencoder_loss is not None:
-                self.temporal_autoencoder_loss = \
-                    self.constants["temporal_autoencoder_coeff"] * self.temporal_autoencoder_loss
-                loss = loss + self.temporal_autoencoder_loss
-        else:
-            self.temporal_autoencoder_loss = None
-
-        if self.config["do_object_detection"]:
-            self.object_detection_loss = self.object_detection_loss_calculator.calc_loss(batch_replay_items)
-            if self.object_detection_loss is not None:
-                self.object_detection_loss = self.constants["object_detection_coeff"] * self.object_detection_loss
-                loss = loss + self.object_detection_loss
-        else:
-            self.object_detection_loss = None
-
-        if self.config["do_symbolic_language_prediction"]:
-            self.symbolic_language_prediction_loss = \
-                self.symbolic_language_prediction_loss_calculator.calc_loss(batch_replay_items)
-            self.symbolic_language_prediction_loss = self.constants["symbolic_language_prediction_coeff"] * \
-                                                     self.symbolic_language_prediction_loss
-            loss = loss + self.symbolic_language_prediction_loss
-        else:
-            self.symbolic_language_prediction_loss = None
-
-        if self.config["do_goal_prediction"]:
-            self.goal_prediction_loss, _, _ = self.goal_prediction_calculator.calc_loss(batch_replay_items)
-            if self.goal_prediction_loss is not None:
-                self.goal_prediction_loss = self.constants["goal_prediction_coeff"] * \
-                                            self.goal_prediction_loss
-                loss = loss + self.goal_prediction_loss  # * len(batch_replay_items)  # scale the loss
-        else:
-            self.goal_prediction_loss = None
 
         return loss
 
@@ -245,9 +164,6 @@ class AsynchronousContextualBandit(AbstractLearning):
                                            pose=pose,
                                            position_orientation=position_orientation,
                                            data_point=data_point)
-                state.goal = GoalPrediction.get_goal_location(metadata, data_point,
-                                                              learner.image_height, learner.image_width)
-
                 model_state = None
                 batch_replay_items = []
                 total_reward = 0
@@ -264,13 +180,6 @@ class AsynchronousContextualBandit(AbstractLearning):
                     action = gp.sample_action_from_prob(probabilities)
                     action_counts[action] += 1
 
-                    # Generate goal
-                    if config["do_goal_prediction"]:
-                        goal = learner.goal_prediction_calculator.get_goal_location(
-                            metadata, data_point, learner.image_height, learner.image_width)
-                    else:
-                        goal = None
-
                     if action == action_space.get_stop_action_index():
                         forced_stop = False
                         break
@@ -280,7 +189,7 @@ class AsynchronousContextualBandit(AbstractLearning):
 
                     # Store it in the replay memory list
                     replay_item = ReplayMemoryItem(state, action, reward,
-                                                   log_prob=log_probabilities, volatile=volatile, goal=goal)
+                                                   log_prob=log_probabilities, volatile=volatile)
                     batch_replay_items.append(replay_item)
 
                     # Update the agent state
@@ -314,7 +223,7 @@ class AsynchronousContextualBandit(AbstractLearning):
                 # Store it in the replay memory list
                 if not forced_stop:
                     replay_item = ReplayMemoryItem(state, action_space.get_stop_action_index(),
-                                                   reward, log_prob=log_probabilities, volatile=volatile, goal=goal)
+                                                   reward, log_prob=log_probabilities, volatile=volatile, goal=None)
                     batch_replay_items.append(replay_item)
 
                 # Update the scores based on meta_data
@@ -323,34 +232,12 @@ class AsynchronousContextualBandit(AbstractLearning):
                 # Perform update
                 if len(batch_replay_items) > 0:  # 32:
                     loss_val = learner.do_update(batch_replay_items)
-                    # self.action_prediction_loss_calculator.predict_action(batch_replay_items)
-                    # del batch_replay_items[:]  # in place list clear
 
                     if tensorboard is not None:
-                        cross_entropy = float(learner.cross_entropy.data[0])
-                        tensorboard.log(cross_entropy, loss_val, 0)
                         entropy = float(learner.entropy.data[0])/float(num_actions + 1)
+                        tensorboard.log_scalar("loss", loss_val)
                         tensorboard.log_scalar("entropy", entropy)
                         tensorboard.log_scalar("total_reward", total_reward)
-
-                        ratio = float(learner.ratio.data[0])
-                        tensorboard.log_scalar("Abs_objective_to_entropy_ratio", ratio)
-
-                        if learner.action_prediction_loss is not None:
-                            action_prediction_loss = float(learner.action_prediction_loss.data[0])
-                            learner.tensorboard.log_action_prediction_loss(action_prediction_loss)
-                        if learner.temporal_autoencoder_loss is not None:
-                            temporal_autoencoder_loss = float(learner.temporal_autoencoder_loss.data[0])
-                            tensorboard.log_temporal_autoencoder_loss(temporal_autoencoder_loss)
-                        if learner.object_detection_loss is not None:
-                            object_detection_loss = float(learner.object_detection_loss.data[0])
-                            tensorboard.log_object_detection_loss(object_detection_loss)
-                        if learner.symbolic_language_prediction_loss is not None:
-                            symbolic_language_prediction_loss = float(learner.symbolic_language_prediction_loss.data[0])
-                            tensorboard.log_scalar("sym_language_prediction_loss", symbolic_language_prediction_loss)
-                        if learner.goal_prediction_loss is not None:
-                            goal_prediction_loss = float(learner.goal_prediction_loss.data[0])
-                            tensorboard.log_scalar("goal_prediction_loss", goal_prediction_loss)
 
             # Save the model
             local_model.save_model(experiment + "/contextual_bandit_" + str(rank) + "_epoch_" + str(epoch))
@@ -367,47 +254,3 @@ class AsynchronousContextualBandit(AbstractLearning):
                 # Test on tuning data
                 agent.test(tune_dataset, tensorboard=tensorboard,
                            logger=logger, pushover_logger=pushover_logger)
-
-    @staticmethod
-    def do_test_(shared_model, config, action_space, meta_data_util, constants,
-                  train_dataset, tune_dataset, experiment, experiment_name, rank, server,
-                  logger, model_type, use_pushover=False):
-
-        server.initialize_server()
-
-        # Test policy
-        test_policy = gp.get_argmax_action
-
-        # torch.manual_seed(args.seed + rank)
-
-        if rank == 0:  # client 0 creates a tensorboard server
-            tensorboard = Tensorboard(experiment_name)
-        else:
-            tensorboard = None
-
-        if use_pushover:
-            pushover_logger = PushoverLogger(experiment_name)
-        else:
-            pushover_logger = None
-
-        # Create a local model for rollouts
-        local_model = model_type(config, constants)
-        # local_model.train()
-
-        # Create the Agent
-        logger.log("STARTING AGENT")
-        agent = Agent(server=server,
-                      model=local_model,
-                      test_policy=test_policy,
-                      action_space=action_space,
-                      meta_data_util=meta_data_util,
-                      config=config,
-                      constants=constants)
-        logger.log("Created Agent...")
-
-        # Launch unity
-        launch_k_unity_builds([config["port"]], "./simulators/NavDroneLinuxBuild.x86_64")
-
-        # Test on tuning data
-        agent.test(tune_dataset, tensorboard=tensorboard,
-                   logger=logger, pushover_logger=pushover_logger)

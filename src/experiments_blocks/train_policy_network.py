@@ -22,7 +22,7 @@ from utils.multiprocess_logger import MultiprocessingLoggerManager
 
 def main():
 
-    experiment_name = "blocks_emnlp_wtf_cb_overfit_2"
+    experiment_name = "blocks_world_experiments"
     experiment = "./results/" + experiment_name
     print("EXPERIMENT NAME: ", experiment_name)
 
@@ -76,14 +76,10 @@ def main():
     num_processes = 6
 
     try:
-        # create tensorboard
-        tensorboard = None  # Tensorboard(experiment_name)
-
         # Create the model
         master_logger.log("CREATING MODEL")
         model_type = IncrementalModelEmnlp
         shared_model = model_type(config, constants)
-        #shared_model.load_saved_model("./results/blocks_emnlp_wtf_learning_rate_0.001/contextual_bandit_0_epoch_3")
 
         # make the shared model use share memory
         shared_model.share_memory()
@@ -92,15 +88,14 @@ def main():
         print("Created Model...")
 
         # Read the dataset
-        all_train_data = DatasetParser.parse("FALSE FLAG THIS IS NOT BEING USED ... :)", config)
-        all_train_data = all_train_data[0:10]
-        num_tune = 5
-        tune_split = all_train_data[:num_tune]
-        train_split = list(all_train_data[:])#list(all_train_data[num_tune:])
+        all_train_data = DatasetParser.parse("trainset.json", config)
+        num_train = int(0.8 * len(all_train_data))
+        train_split = all_train_data[:num_train]
+        tune_split = list(all_train_data[num_train:])
         shuffle(train_split)  # shuffle the split to break ties
 
         master_logger.log("Created train dataset of size %d " % len(train_split))
-        master_logger.log("Created tuning dataset of size %d " % len(tune_split))
+        master_logger.log("Created tuning/validation dataset of size %d " % len(tune_split))
 
         processes = []
 
@@ -112,6 +107,8 @@ def main():
             chunk = train_split[pad: pad + chunk_size]
             pad += chunk_size
             train_split_process_chunks.append(chunk)
+
+        simulator_file = "./simulators/blocks/retro_linux_build.x86_64"
 
         # Start the training thread(s)
         ports = find_k_ports(num_processes)
@@ -127,10 +124,11 @@ def main():
             print("Client " + str(i) + " getting a validation set of size ", len(tmp_tune_split))
             server = BlocksServer(tmp_config, action_space)
             client_logger = multiprocess_logging_manager.get_logger(i)
-            p = mp.Process(target=TmpAsynchronousContextualBandit.do_train, args=(shared_model, tmp_config,
-                                                                                  action_space, meta_data_util,
-                                                                                  constants, train_chunk, tmp_tune_split,
-                                                                                  experiment, experiment_name, i, server,
+            p = mp.Process(target=TmpAsynchronousContextualBandit.do_train, args=(simulator_file, shared_model,
+                                                                                  tmp_config, action_space,
+                                                                                  meta_data_util, constants, train_chunk,
+                                                                                  tmp_tune_split, experiment,
+                                                                                  experiment_name, i, server,
                                                                                   client_logger, model_type, vocab))
             p.daemon = False
             p.start()

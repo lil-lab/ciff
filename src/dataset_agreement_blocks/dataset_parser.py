@@ -18,6 +18,11 @@ class DatasetParser(AbstractDatasetParser):
 
         dataset = []
         for i in range(0, dataset_size):
+            # Dataset for the block world is read on the simulator side. The simulator resets to an example
+            # based on the shared config file containing the name of the split and an id of the example.
+            # For this reason, the block world dataset contains only an ID.
+
+            # TODO add other information for logging by also parsing the data on client side.
             datapoint = DataPoint(i)
             dataset.append(datapoint)
 
