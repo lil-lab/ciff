@@ -7,24 +7,13 @@ import argparse
 
 import utils.generic_policy as gp
 from agents.agent import Agent
-from baselines.DeepRL_Grounding.models import A3C_LSTM_GA
 from baselines.chaplot_model_concat_gavector import a3c_lstm_ga_concat_gavector
-from baselines.chaplot_model_concat_instructions import a3c_lstm_ga_concat_instructions
-from baselines.chaplot_model_default import a3c_lstm_ga_default
-from baselines.chaplot_model_attention_single import a3c_lstm_ga_attention_single
-from baselines.chaplot_model_attention import a3c_lstm_ga_attention
-from baselines.chaplot_model_attention_temporal import a3c_lstm_ga_attention_temporal
-from baselines.chaplot_model_attention_multigru import a3c_lstm_ga_attention_multigru
 from dataset_agreement_nav_drone.action_space import ActionSpace
 from dataset_agreement_nav_drone.metadata_util import MetaDataUtil
 from dataset_agreement_nav_drone.nav_drone_dataset_parser import DatasetParser
-from learning.single_client.drone_prediction_train_test import DronePredictionTrainTest
-from models.model.model_position_prediction_network_resnet import ModelPositionPredictionNetworkResnet
 from server_nav_drone.nav_drone_server import NavDroneServer
-from setup_agreement_nav_drone.validate_setup_nav_drone import \
-    NavDroneSetupValidator
+from setup_agreement_nav_drone.validate_setup_nav_drone import NavDroneSetupValidator
 from utils.tensorboard import Tensorboard
-
 from baselines.chaplot_baseline import ChaplotBaseline
 
 experiment_name = "train_chaplot_concat_gavector_a3c_contd"

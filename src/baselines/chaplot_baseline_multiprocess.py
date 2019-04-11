@@ -9,7 +9,6 @@ import utils.generic_policy as gp
 
 from agents.agent import Agent
 from torch.autograd import Variable
-from baselines.chaplot_model_prevstategating import a3c_lstm_ga_prev_stategating
 from utils.launch_unity import launch_k_unity_builds
 from utils.pushover_logger import PushoverLogger
 from utils.tensorboard import Tensorboard

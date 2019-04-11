@@ -8,10 +8,8 @@ import argparse
 
 import utils.generic_policy as gp
 from agents.agent import Agent
-from baselines.chaplot_model_attention_multigru import a3c_lstm_ga_attention_multigru
 from baselines.chaplot_model_concat_gavector import a3c_lstm_ga_concat_gavector
 from baselines.chaplot_model_default import a3c_lstm_ga_default
-from baselines.chaplot_model_default_auxiliary import a3c_lstm_ga_default_with_aux
 from dataset_agreement_nav_drone.action_space import ActionSpace
 from dataset_agreement_nav_drone.metadata_util import MetaDataUtil
 from dataset_agreement_nav_drone.nav_drone_dataset_parser import DatasetParser
