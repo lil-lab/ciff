@@ -43,7 +43,7 @@ Researchers and Developers: Dipendra Misra, Andrew Bennett, Max Shatkin, Eyvind 
 
 Publications using models, data or simulators provided with CIFF.
 
-1) Touchdown: Natural Language Navigation and Spatial Reasoning in Visual Street Environments *Howard Chen, Alane Suhr, Dipendra Misra, Noah Snavely, Yoav Artzi*, [arXiv 2018](https://arxiv.org/pdf/1811.12354.pdf)  (Uses CIFF for navigation baselines)
+1) Touchdown: Natural Language Navigation and Spatial Reasoning in Visual Street Environments *Howard Chen, Alane Suhr, Dipendra Misra, Noah Snavely, Yoav Artzi*, [CVPR 2019](https://arxiv.org/pdf/1811.12354.pdf)  (Uses CIFF for navigation)
 
 2) Mapping Navigation Instructions to Continuous Control Actions with Position Visitation Prediction *Valts Blukis, Dipendra Misra, Ross A. Knepper, and Yoav Artzi*, [CoRL 2018](http://www.cs.cornell.edu/~dkm/papers/bmka-corl.2018.pdf) (Uses only the LANI dataset and simulator.)
 
@@ -59,17 +59,7 @@ Publications using models, data or simulators provided with CIFF.
 
 1) Clone the repostory using `git clone https://github.com/clic-lab/instruction-following-framework.git`
 
-2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details. Place the data and simulator files in the same ciff folder alongside the src folder. Your directory structure should look like:
-
-- ./ciff/
-
-     - data
-     
-     - simulators
-     
-     - src
-     
-     - media
+2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details. Place the data and simulator files in the same ciff folder alongside the src folder. The CIFF directory should contain 4 folders: src, simulators, data and media.
      
 3) Set PYTHONENV to treat the src folder as root. One way to do this is to run:
  
