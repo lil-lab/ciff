@@ -8,7 +8,6 @@ import numpy as np
 from agents.agent import Agent
 from agents.agent_observed_state import AgentObservedState
 from agents.replay_memory_item import ReplayMemoryItem
-from learning.auxiliary_objective.goal_prediction import GoalPrediction
 from learning.asynchronous.abstract_learning import AbstractLearning
 from utils.cuda import cuda_var
 from utils.launch_unity import launch_k_unity_builds
@@ -63,11 +62,11 @@ class AsynchronousContextualBandit(AbstractLearning):
         return loss
 
     @staticmethod
-    def do_train(shared_model, config, action_space, meta_data_util,
+    def do_train(simulator_file, shared_model, config, action_space, meta_data_util,
                  constants, train_dataset, tune_dataset, experiment,
                  experiment_name, rank, server, logger, model_type, use_pushover=False):
         try:
-            AsynchronousContextualBandit.do_train_(shared_model, config, action_space, meta_data_util,
+            AsynchronousContextualBandit.do_train_(simulator_file, shared_model, config, action_space, meta_data_util,
                                                    constants, train_dataset, tune_dataset, experiment,
                                                    experiment_name, rank, server, logger, model_type, use_pushover)
         except Exception:
@@ -75,10 +74,12 @@ class AsynchronousContextualBandit(AbstractLearning):
             traceback.print_exception(*exc_info)
 
     @staticmethod
-    def do_train_(shared_model, config, action_space, meta_data_util, constants,
+    def do_train_(simulator_file, shared_model, config, action_space, meta_data_util, constants,
                   train_dataset, tune_dataset, experiment, experiment_name, rank, server,
                   logger, model_type, use_pushover=False):
 
+        # Launch unity
+        launch_k_unity_builds([config["port"]], simulator_file)
         server.initialize_server()
 
         # Test policy
@@ -120,12 +121,7 @@ class AsynchronousContextualBandit(AbstractLearning):
         learner = AsynchronousContextualBandit(shared_model, local_model, action_space, meta_data_util,
                                                config, constants, tensorboard)
 
-        # Launch unity
-        launch_k_unity_builds([config["port"]], "./simulators/NavDroneLinuxBuild.x86_64")
-
         for epoch in range(1, max_epochs + 1):
-
-            learner.epoch = epoch
 
             for data_point_ix, data_point in enumerate(train_dataset):
 
@@ -147,7 +143,7 @@ class AsynchronousContextualBandit(AbstractLearning):
                                            start_image=image,
                                            previous_action=None,
                                            data_point=data_point)
-                meta_data_util.state_update_metadata(state, metadata)
+                meta_data_util.start_state_update_metadata(state, metadata)
 
                 model_state = None
                 batch_replay_items = []

@@ -97,6 +97,8 @@ def main():
 
         processes = []
 
+        simulator_file = "./simulators/NavDroneLinuxBuild.x86_64"
+
         # Split the train data between processes
         train_split_process_chunks = []
         chunk_size = int(len(train_split)/num_processes)
@@ -120,7 +122,7 @@ def main():
             print("Client " + str(i) + " getting a validation set of size ", len(tmp_tune_split))
             server = NavDroneServerPy3(tmp_config, action_space, multi_client=True)
             client_logger = multiprocess_logging_manager.get_logger(i)
-            p = mp.Process(target=AsynchronousContextualBandit.do_train, args=(shared_model, tmp_config,
+            p = mp.Process(target=AsynchronousContextualBandit.do_train, args=(simulator_file, shared_model, tmp_config,
                                                                                action_space, meta_data_util,
                                                                                constants, train_chunk, tmp_tune_split,
                                                                                experiment, experiment_name, i, server,

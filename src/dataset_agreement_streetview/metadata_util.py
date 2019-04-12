@@ -15,6 +15,9 @@ class MetaDataUtil(AbstractMetaDataUtil):
             logging.info("StreetView Metadata: " + str(metadata))
 
 
+    def start_state_update_metadata(self, state, metadata):
+        self.state_update_metadata(state, metadata)
+
     def state_update_metadata(self, state, metadata):
 
         # For LANI, the metadata contains pose, position and orientation information

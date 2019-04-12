@@ -4,13 +4,12 @@ import torch
 import torch.optim as optim
 import utils.generic_policy as gp
 import numpy as np
-import nltk
 
-from utils.cuda import cuda_var
+from agents.tmp_agent import TmpBlockAgent
 from agents.agent_observed_state import AgentObservedState
 from agents.replay_memory_item import ReplayMemoryItem
-from agents.tmp_agent import TmpBlockAgent
 from learning.asynchronous.abstract_learning import AbstractLearning
+from utils.cuda import cuda_var
 from utils.launch_unity import launch_k_unity_builds
 from utils.pushover_logger import PushoverLogger
 from utils.tensorboard import Tensorboard
@@ -63,34 +62,13 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         return loss
 
     @staticmethod
-    def convert_text_to_indices(text, vocab, ignore_case=True):
-
-        # Tokenize the text
-        token_seq = nltk.word_tokenize(text)
-
-        indices = []
-
-        for token in token_seq:
-            if ignore_case:
-                ltoken = token.lower()
-            else:
-                ltoken = token
-            if ltoken in vocab:
-                indices.append(vocab[ltoken])
-            else:
-                indices.append(vocab["$UNK$"])
-
-        return indices
-
-    @staticmethod
-    def do_train(shared_model, config, action_space, meta_data_util,
+    def do_train(simulator_file, shared_model, config, action_space, meta_data_util,
                  constants, train_dataset, tune_dataset, experiment,
-                 experiment_name, rank, server, logger, model_type, vocab, use_pushover=False):
+                 experiment_name, rank, server, logger, model_type, use_pushover=False):
         try:
-            TmpAsynchronousContextualBandit.do_train_(shared_model, config, action_space, meta_data_util,
-                                                   constants, train_dataset, tune_dataset, experiment,
-                                                   experiment_name, rank, server, logger, model_type,
-                                                      vocab, use_pushover)
+            TmpAsynchronousContextualBandit.do_train_(simulator_file, shared_model, config, action_space, meta_data_util,
+                                                      constants, train_dataset, tune_dataset, experiment,
+                                                      experiment_name, rank, server, logger, model_type, use_pushover)
         except Exception:
             exc_info = sys.exc_info()
             traceback.print_exception(*exc_info)
@@ -98,7 +76,7 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
     @staticmethod
     def do_train_(simulator_file, shared_model, config, action_space, meta_data_util, constants,
                   train_dataset, tune_dataset, experiment, experiment_name, rank, server,
-                  logger, model_type, vocab, use_pushover=False):
+                  logger, model_type, use_pushover=False):
 
         launch_k_unity_builds([config["port"]], simulator_file)
         server.initialize_server()
@@ -124,13 +102,13 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
 
         # Create the Agent
         logger.log("STARTING AGENT")
-        tmp_agent = TmpBlockAgent(server=server,
-                                  model=local_model,
-                                  test_policy=test_policy,
-                                  action_space=action_space,
-                                  meta_data_util=meta_data_util,
-                                  config=config,
-                                  constants=constants)
+        agent = TmpBlockAgent(server=server,
+                              model=local_model,
+                              test_policy=test_policy,
+                              action_space=action_space,
+                              meta_data_util=meta_data_util,
+                              config=config,
+                              constants=constants)
         logger.log("Created Agent...")
 
         action_counts = [0] * action_space.num_actions()
@@ -141,8 +119,6 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
         # Create the learner to compute the loss
         learner = TmpAsynchronousContextualBandit(shared_model, local_model, action_space, meta_data_util,
                                                   config, constants, tensorboard)
-        # TODO change 2 --- unity launch moved up
-
         for epoch in range(1, max_epochs + 1):
 
             for data_point_ix, data_point in enumerate(train_dataset):
@@ -157,16 +133,15 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                 num_actions = 0
                 max_num_actions = constants["horizon"] + constants["max_extra_horizon"]
 
-                image, metadata = tmp_agent.server.reset_receive_feedback(data_point)
-                instruction = TmpAsynchronousContextualBandit.convert_text_to_indices(metadata["instruction"], vocab)
+                image, metadata = agent.server.reset_receive_feedback(data_point)
 
-                state = AgentObservedState(instruction=instruction,
+                state = AgentObservedState(instruction=data_point.instruction,
                                            config=config,
                                            constants=constants,
                                            start_image=image,
                                            previous_action=None,
                                            data_point=data_point)
-                meta_data_util.state_update_metadata(state, metadata)
+                meta_data_util.start_state_update_metadata(state, metadata)
 
                 model_state = None
                 batch_replay_items = []
@@ -189,7 +164,7 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                         break
 
                     # Send the action and get feedback
-                    image, reward, metadata = tmp_agent.server.send_action_receive_feedback(action)
+                    image, reward, metadata = agent.server.send_action_receive_feedback(action)
 
                     # Store it in the replay memory list
                     replay_item = ReplayMemoryItem(state, action, reward, log_prob=log_probabilities, volatile=volatile)
@@ -203,7 +178,7 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
                     total_reward += reward
 
                 # Send final STOP action and get feedback
-                image, reward, metadata = tmp_agent.server.halt_and_receive_feedback()
+                image, reward, metadata = agent.server.halt_and_receive_feedback()
                 total_reward += reward
 
                 if tensorboard is not None:
@@ -231,5 +206,5 @@ class TmpAsynchronousContextualBandit(AbstractLearning):
 
             if tune_dataset_size > 0:
                 # Test on tuning data
-                tmp_agent.test(tune_dataset, vocab, tensorboard=tensorboard,
+                agent.test(tune_dataset, tensorboard=tensorboard,
                            logger=logger, pushover_logger=pushover_logger)

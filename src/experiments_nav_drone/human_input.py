@@ -15,7 +15,7 @@ from setup_agreement_nav_drone.validate_setup_nav_drone import \
 from utils.check_port import find_k_ports
 from utils.launch_unity import launch_k_unity_builds
 
-experiment = "./results/emnlp_rebuttal_test_human_performance_on_100_dev_no_object_disappears"
+experiment = "./results/human_performance"
 
 # Create the experiment folder
 if not os.path.exists(experiment):

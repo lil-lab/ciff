@@ -46,7 +46,7 @@ class TmpBlockAgent:
 
         return indices
 
-    def test(self, test_dataset, vocab, tensorboard=None, logger=None,
+    def test(self, test_dataset, tensorboard=None, logger=None,
              pushover_logger=None):
 
         self.server.clear_metadata()

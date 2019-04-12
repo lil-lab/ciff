@@ -122,14 +122,14 @@ def main():
             else:
                 tmp_tune_split = []
             print("Client " + str(i) + " getting a validation set of size ", len(tmp_tune_split))
-            server = BlocksServer(tmp_config, action_space)
+            server = BlocksServer(tmp_config, action_space, vocab=vocab)
             client_logger = multiprocess_logging_manager.get_logger(i)
             p = mp.Process(target=TmpAsynchronousContextualBandit.do_train, args=(simulator_file, shared_model,
                                                                                   tmp_config, action_space,
                                                                                   meta_data_util, constants, train_chunk,
                                                                                   tmp_tune_split, experiment,
                                                                                   experiment_name, i, server,
-                                                                                  client_logger, model_type, vocab))
+                                                                                  client_logger, model_type))
             p.daemon = False
             p.start()
             processes.append(p)
