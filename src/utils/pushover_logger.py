@@ -1,8 +1,8 @@
 # from pushover import Client
 
 
-ANDREW_CLIENT_TOKEN = "ugjao5fpppapbx3bpp1qiazf89ahi6"
-ANDREW_API_TOKEN = "aqk71722xjmb4huuuzzjaxrf7aanpt"
+ANDREW_CLIENT_TOKEN = None
+ANDREW_API_TOKEN = None
 
 
 class PushoverLogger(object):
