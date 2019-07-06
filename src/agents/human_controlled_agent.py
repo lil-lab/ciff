@@ -1,13 +1,7 @@
-import json
 import logging
-
 import time
 import torch
-import scipy.misc
-import os
-import math
 import random
-import numpy as np
 
 from agents.agent_observed_state import AgentObservedState
 from utils.debug_nav_drone_instruction import instruction_to_string
@@ -15,11 +9,10 @@ from models.model.abstract_model import AbstractModel
 from models.incremental_model.abstract_incremental_model import AbstractIncrementalModel
 
 
-NO_BUCKETS = 48
-BUCKET_WIDTH = 360.0/(1.0*NO_BUCKETS)
-
-
 class HumanControlledAgent:
+    """ A class for interactive testing where humans can give commands to the agent.
+    TODO: Currently only supports nav_drone. Extend it to other types of agents.
+    """
 
     def __init__(self, server, model, test_policy, action_space, meta_data_util,
                  config, constants):
@@ -56,19 +49,20 @@ class HumanControlledAgent:
         action_counts = [0] * self.action_space.num_actions()
         task_completion_accuracy = 0
         print("Reached Test")
-        test_dataset_size = len(test_dataset)
 
-        metadata = {"feedback": ""}
         data_point = random.sample(test_dataset, 1)[0]
+
         while True:
 
             print("Please enter an instruction. For sample see:")
-            # data_point = random.sample(test_dataset, 1)[0]
             image, metadata = self.server.reset_receive_feedback(data_point)
+
             print("Sample instruction: ", instruction_to_string(data_point.get_instruction(), self.config))
             input_instruction = input("Enter an instruction or enter q to quit ")
+
             if input_instruction == "q" or input_instruction == "quit":
                 break
+
             input_instruction_ids = self.convert_to_id(input_instruction)
 
             pose = int(metadata["y_angle"] / 15.0)
@@ -84,11 +78,11 @@ class HumanControlledAgent:
                                        data_point=data_point,
                                        prev_instruction=data_point.get_prev_instruction(),
                                        next_instruction=data_point.get_next_instruction())
-            # state.start_read_pointer, state.end_read_pointer = data_point.get_instruction_indices()
+
             num_actions = 0
             max_num_actions = self.constants["horizon"]
             model_state = None
-            # print "Model state is new "
+
             while True:
 
                 time.sleep(0.3)
@@ -107,8 +101,6 @@ class HumanControlledAgent:
 
                 # Use test policy to get the action
                 action = self.test_policy(probabilities)
-                # DONT FORGET TO REMOVE
-                # action = np.random.randint(0, 2)
                 action_counts[action] += 1
 
                 if action == self.action_space.get_stop_action_index() or num_actions >= max_num_actions:

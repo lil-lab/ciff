@@ -5,8 +5,9 @@ from utils.debug_nav_drone_instruction import instruction_to_string
 
 
 class _GetchUnix:
+
     def __init__(self):
-        import tty, sys
+        pass
 
     def __call__(self):
         import sys, tty, termios
@@ -21,6 +22,9 @@ class _GetchUnix:
 
 
 class KeyboardAgent:
+    """ A class that allows users to control the agent and provides visual display
+    TODO: Currently only supports nav_drone. Extend it to other types of agent.
+    """
 
     def __init__(self, server, action_space, meta_data_util, config, constants):
         self.server = server
@@ -114,73 +118,5 @@ class KeyboardAgent:
                     num_actions += 1
 
         logging.info("Human accuracy on dataset of size %r", len(test_dataset))
-        self.meta_data_util.log_results(metadata)
-        logging.info("Testing data action counts %r", action_counts)
-
-    def test_auto_segmented(self, test_dataset, tensorboard=None,
-                            segmenting_type="auto"):
-        raise NotImplementedError()
-        assert segmenting_type in ("auto", "oracle")
-        self.server.clear_metadata()
-        action_counts = [0] * self.action_space.num_actions()
-
-        metadata = ""
-
-        for data_point in test_dataset:
-            if segmenting_type == "auto":
-                segmented_instruction = data_point.get_instruction_auto_segmented()
-            else:
-                segmented_instruction = data_point.get_instruction_oracle_segmented()
-            num_segments = len(segmented_instruction)
-            gold_num_actions = len(data_point.get_trajectory())
-            horizon = gold_num_actions // num_segments
-            horizon += self.constants["max_extra_horizon_auto_segmented"]
-
-            image, metadata = self.server.reset_receive_feedback(data_point)
-
-            instruction = instruction_to_string(
-                data_point.get_instruction(), self.config)
-            print("TEST INSTRUCTION: %r" % instruction)
-            print("")
-
-            for instruction_i, instruction in enumerate(segmented_instruction):
-
-                state = AgentObservedState(instruction=instruction,
-                                           config=self.config,
-                                           constants=self.constants,
-                                           start_image=image,
-                                           previous_action=None)
-
-                num_actions = 0
-                # self._save_agent_state(state, num_actions)
-
-                while True:
-
-                    # Generate probabilities over actions
-                    probabilities = list(torch.exp(self.model.get_probs(state).data))
-                    # print "test probs:", probabilities
-
-                    # Use test policy to get the action
-                    action = self.test_policy(probabilities)
-                    action_counts[action] += 1
-
-                    # logging.info("Taking action-num=%d horizon=%d action=%s from %s",
-                    #              num_actions, max_num_actions, str(action), str(probabilities))
-
-                    if action == self.action_space.get_stop_action_index() or num_actions >= horizon:
-                        break
-
-                    else:
-                        # Send the action and get feedback
-                        image, reward, metadata = self.server.send_action_receive_feedback(action)
-
-                        # Update the agent state
-                        state = state.update(image, action)
-                        num_actions += 1
-
-            _,  _, metadata = self.server.halt_and_receive_feedback()
-            if tensorboard is not None:
-                tensorboard.log_test_error(metadata["error"])
-
         self.meta_data_util.log_results(metadata)
         logging.info("Testing data action counts %r", action_counts)

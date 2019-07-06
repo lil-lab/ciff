@@ -9,13 +9,10 @@ from random import shuffle
 from dataset_agreement_blocks.action_space import ActionSpace
 from dataset_agreement_blocks.metadata_util import MetaDataUtil
 from dataset_agreement_blocks.dataset_parser import DatasetParser
-from learning.asynchronous.tmp_blocks_asynchronous_contextual_bandit_learning import TmpAsynchronousContextualBandit
-from learning.asynchronous.tmp_blocks_supervised_learning import TmpSupervisedLearning
 from models.incremental_model.incremental_model_emnlp import IncrementalModelEmnlp
-from models.incremental_model.tmp_blocks_incremental_model_chaplot import TmpBlocksIncrementalModelChaplot
+from learning.asynchronous.asynchronous_contextual_bandit_learning import AsynchronousContextualBandit
 from server_blocks.blocks_server import BlocksServer
-from setup_agreement_blocks.validate_setup_blocks import \
-    BlocksSetupValidator
+from setup_agreement_blocks.validate_setup_blocks import BlocksSetupValidator
 from utils.check_port import find_k_ports
 from utils.multiprocess_logger import MultiprocessingLoggerManager
 
@@ -113,6 +110,7 @@ def main():
         # Start the training thread(s)
         ports = find_k_ports(num_processes)
         for i, port in enumerate(ports):
+
             train_chunk = train_split_process_chunks[i]
             tmp_config = {k: v for k, v in config.items()}
             tmp_config["port"] = port
@@ -124,12 +122,13 @@ def main():
             print("Client " + str(i) + " getting a validation set of size ", len(tmp_tune_split))
             server = BlocksServer(tmp_config, action_space, vocab=vocab)
             client_logger = multiprocess_logging_manager.get_logger(i)
-            p = mp.Process(target=TmpAsynchronousContextualBandit.do_train, args=(simulator_file, shared_model,
-                                                                                  tmp_config, action_space,
-                                                                                  meta_data_util, constants, train_chunk,
-                                                                                  tmp_tune_split, experiment,
-                                                                                  experiment_name, i, server,
-                                                                                  client_logger, model_type))
+
+            p = mp.Process(target=AsynchronousContextualBandit.do_train, args=(simulator_file, shared_model,
+                                                                               tmp_config, action_space,
+                                                                               meta_data_util, constants, train_chunk,
+                                                                               tmp_tune_split, experiment,
+                                                                               experiment_name, i, server,
+                                                                               client_logger, model_type))
             p.daemon = False
             p.start()
             processes.append(p)

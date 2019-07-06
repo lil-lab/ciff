@@ -1,13 +1,20 @@
 import random
 import logging
 
-import time
-
 from server_house.house_server import HouseServer
 from utils.launch_unity import launch_k_unity_builds
 
 
 class Agent:
+    """
+    This class defines an agent that does not use a parametrized model.
+    Currently this class supports four type of models:
+
+    STOP: Agent stops immediately
+    ORACLE: Agent follows gold trajectories
+    RANDOM_WALK: Agent samples an action randomly uniformly
+    MOST_FREQUENT: Agent takes an action which is most frequent in the training data.
+    """
 
     STOP, ORACLE, RANDOM_WALK, MOST_FREQUENT = range(4)
 
