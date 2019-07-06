@@ -76,9 +76,9 @@ For details on experiments see the [Wiki](https://github.com/clic-lab/ciff/wiki)
 
 ## More on CIFF from the Wiki
 
-1. (https://github.com/lil-lab/ciff/wiki/Datasets-and-Simulators)[Reading Dataset and Simulators]
-2. (https://github.com/lil-lab/ciff/wiki/Sample-Experiments)[List of Sample Experiments]
-3. (https://github.com/lil-lab/ciff/wiki/Debugging-Tools)[Debugging using CIFF]
-4. (https://github.com/lil-lab/ciff/wiki/FAQ)[Frequently Asked Questions]
+1. [Reading Dataset and Simulators](https://github.com/lil-lab/ciff/wiki/Datasets-and-Simulators)
+2. [List of Sample Experiments](https://github.com/lil-lab/ciff/wiki/Sample-Experiments)
+3. [Debugging using CIFF](https://github.com/lil-lab/ciff/wiki/Debugging-Tools)
+4. [Frequently Asked Questions](https://github.com/lil-lab/ciff/wiki/FAQ)
 
-Have more questions, please raise an (https://github.com/lil-lab/ciff/issues)[issue] or email at dkm@cs.cornell.edu.
+Have more questions, please raise an [issue](https://github.com/lil-lab/ciff/issues) or email at dkm@cs.cornell.edu.
