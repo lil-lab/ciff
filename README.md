@@ -73,3 +73,12 @@ Publications using models, data or simulators provided with CIFF.
    where `domain_name` is the name of the domain (e.g., nav_drone for LANI, house for CHAI, streetview for touchdown, blocks for blocks) and `experiment_name` is the name of the experiment you want to run.
 
 For details on experiments see the [Wiki](https://github.com/clic-lab/ciff/wiki).
+
+## More on CIFF from the Wiki
+
+1. (https://github.com/lil-lab/ciff/wiki/Datasets-and-Simulators)[Reading Dataset and Simulators]
+2. (https://github.com/lil-lab/ciff/wiki/Sample-Experiments)[List of Sample Experiments]
+3. (https://github.com/lil-lab/ciff/wiki/Debugging-Tools)[Debugging using CIFF]
+4. (https://github.com/lil-lab/ciff/wiki/FAQ)[Frequently Asked Questions]
+
+Have more questions, please raise an (https://github.com/lil-lab/ciff/issues)[issue] or email at dkm@cs.cornell.edu.
