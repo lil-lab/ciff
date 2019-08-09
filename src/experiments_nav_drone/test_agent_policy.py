@@ -3,24 +3,15 @@ import logging
 import os
 import sys
 import traceback
-
-from models.incremental_model.incremental_ensemble_of_models import IncrementalEnsembleOfModels
-from models.incremental_model.incremental_model_attention_chaplot_resnet import IncrementalModelAttentionChaplotResNet
-from models.incremental_model.incremental_model_oracle_gold_prob import IncrementalModelOracleGoldProb
-from server_nav_drone.nav_drone_server_py3 import NavDroneServerPy3
-
 import utils.generic_policy as gp
+
 from agents.agent import Agent
 from dataset_agreement_nav_drone.action_space import ActionSpace
 from dataset_agreement_nav_drone.metadata_util import MetaDataUtil
 from dataset_agreement_nav_drone.nav_drone_dataset_parser import DatasetParser
-from models.incremental_model.incremental_model_recurrent_policy_network_only_symbolic_text import\
-    IncrementalModelRecurrentPolicyNetworkSymbolicTextResnet
-from models.incremental_model.incremental_model_recurrent_policy_network_resnet import \
-    IncrementalModelRecurrentPolicyNetworkResnet
-from server_nav_drone.nav_drone_server import NavDroneServer
-from setup_agreement_nav_drone.validate_setup_nav_drone import \
-    NavDroneSetupValidator
+from models.incremental_model.incremental_model_oracle_gold_prob import IncrementalModelOracleGoldProb
+from server_nav_drone.nav_drone_server_py3 import NavDroneServerPy3
+from setup_agreement_nav_drone.validate_setup_nav_drone import NavDroneSetupValidator
 from utils.check_port import find_k_ports
 from utils.launch_unity import launch_k_unity_builds
 from utils.tensorboard import Tensorboard
@@ -45,8 +36,8 @@ with open("data/nav_drone/config_localmoves_6000.json") as f:
     config = json.load(f)
 with open("data/shared/contextual_bandit_constants.json") as f:
     constants = json.load(f)
-# if len(sys.argv) > 1:
-#     config["port"] = int(sys.argv[1])
+
+# Valide the dataset
 setup_validator = NavDroneSetupValidator()
 setup_validator.validate(config, constants)
 

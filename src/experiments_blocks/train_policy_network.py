@@ -19,7 +19,7 @@ from utils.multiprocess_logger import MultiprocessingLoggerManager
 
 def main():
 
-    experiment_name = "blocks_world_experiments"
+    experiment_name = "blocks_experiments"
     experiment = "./results/" + experiment_name
     print("EXPERIMENT NAME: ", experiment_name)
 

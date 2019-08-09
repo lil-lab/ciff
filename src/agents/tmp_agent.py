@@ -121,25 +121,6 @@ class TmpBlockAgent:
             pushover_feedback = str(metadata["feedback"])
             pushover_logger.log(pushover_feedback)
 
-    def save_numpy_image(self, test_dataset, vocab, folder):
-
-        self.server.clear_metadata()
-
-        os.mkdir("./block_world_%s_image_data" % folder)
-        for data_point_ix, data_point in enumerate(test_dataset):
-            image, metadata = self.server.reset_receive_feedback(data_point)
-            instruction_string = metadata["instruction"]
-            instruction = self.convert_text_to_indices(metadata["instruction"], vocab)
-            image, reward, metadata = self.server.halt_and_receive_feedback()
-            folder_name = "./block_world_%s_image_data/example_%r" % (folder, data_point_ix + 1)
-            os.mkdir(folder_name)
-            np.save(folder_name + "/image.npy", image)
-            f = open(folder_name + "/instruction.txt", "w")
-            f.write(instruction_string + "\n")
-            f.write(str(instruction))
-            f.flush()
-            f.close()
-
     def test_auto_segmented(self, test_dataset, tensorboard=None,
                             segmenting_type="auto"):
         assert segmenting_type in ("auto", "oracle")

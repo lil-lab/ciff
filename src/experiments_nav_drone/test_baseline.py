@@ -16,12 +16,10 @@ from utils.check_port import find_k_ports
 from utils.launch_unity import launch_k_unity_builds
 
 
-parser = argparse.ArgumentParser(description='LANI Baselines')
-
 # Environment arguments
+parser = argparse.ArgumentParser(description='LANI Baselines')
 parser.add_argument('--baseline',type=str, default="random", help="Three options: stop, random, frequent.")
 parser.add_argument('--split', type=int, default="dev", help="Three options: train, dev and test.")
-
 args = parser.parse_args()
 
 experiment = "./results/test_lani_baseline"
