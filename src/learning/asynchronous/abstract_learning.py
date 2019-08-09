@@ -65,5 +65,3 @@ class AbstractLearning:
                 grad = grad.numpy()
                 self.tensorboard.log_histogram("hist_" + name + "_grad", grad, bins=100)
                 self.tensorboard.log_scalar("mean_" + name + "_grad", mean_grad)
-
-
