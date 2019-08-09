@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import random
 import sys
 import traceback
 import torch.multiprocessing as mp
@@ -9,10 +8,7 @@ import torch.multiprocessing as mp
 from dataset_agreement_nav_drone.action_space import ActionSpace
 from dataset_agreement_nav_drone.metadata_util import MetaDataUtil
 from dataset_agreement_nav_drone.nav_drone_dataset_parser import DatasetParser
-from learning.asynchronous.asynchronous_actor_critic_learning import AsynchronousAdvantageActorGAECritic
 from learning.asynchronous.asynchronous_contextual_bandit_learning import AsynchronousContextualBandit
-from learning.asynchronous.asynchronous_supervised_learning import AsynchronousSupervisedLearning
-from models.incremental_model.incremental_model_attention_chaplot_resnet import IncrementalModelAttentionChaplotResNet
 from models.incremental_model.incremental_model_oracle_gold_prob import IncrementalModelOracleGoldProb, \
     IncrementalModelOracleGoldProbWithImage
 from server_nav_drone.nav_drone_server_py3 import NavDroneServerPy3
@@ -24,7 +20,7 @@ from utils.multiprocess_logger import MultiprocessingLoggerManager
 
 def main():
 
-    experiment_name = "emnlp-rebuttal-oracle_gold_prob_cb_6000-no-LSTM-no-Image"
+    experiment_name = "lani-asynchronous-training"
     experiment = "./results/" + experiment_name
     print("EXPERIMENT NAME: ", experiment_name)
 
@@ -73,11 +69,13 @@ def main():
         master_logger.log("CREATING MODEL")
         model_type = IncrementalModelOracleGoldProb
         shared_model = model_type(config, constants)
-        shared_model.init_weights()
-        '''shared_model.load_saved_model(
-            "./results/full_task_unet_chaplottextmodule_32_provide_prob/contextual_bandit_5_epoch_19")'''
 
-        # make the shared model use share memory
+        # Initialize the model using random weights or from a file
+        shared_model.init_weights()
+        # shared_model.load_saved_model(
+        #     "./results/model-folder-name/contextual_bandit_5_epoch_19")
+
+        # Make the shared model use share memory
         shared_model.share_memory()
 
         master_logger.log("MODEL CREATED")
@@ -97,6 +95,7 @@ def main():
 
         processes = []
 
+        # The simulator file is used to launch the client
         simulator_file = "./simulators/NavDroneLinuxBuild.x86_64"
 
         # Split the train data between processes
@@ -119,9 +118,11 @@ def main():
                 tmp_tune_split = tune_split
             else:
                 tmp_tune_split = []
+
             print("Client " + str(i) + " getting a validation set of size ", len(tmp_tune_split))
             server = NavDroneServerPy3(tmp_config, action_space, multi_client=True)
             client_logger = multiprocess_logging_manager.get_logger(i)
+
             p = mp.Process(target=AsynchronousContextualBandit.do_train, args=(simulator_file, shared_model, tmp_config,
                                                                                action_space, meta_data_util,
                                                                                constants, train_chunk, tmp_tune_split,
