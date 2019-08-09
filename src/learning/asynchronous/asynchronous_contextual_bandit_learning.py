@@ -35,6 +35,7 @@ class AsynchronousContextualBandit(AbstractLearning):
                                   self.optimizer, self.config, self.constants, self.tensorboard)
 
     def calc_loss(self, batch_replay_items):
+        """ Given a set of replay items this function calculates the loss variable """
 
         agent_observation_state_ls = []
         immediate_rewards = []
