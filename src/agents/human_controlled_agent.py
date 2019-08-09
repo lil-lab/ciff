@@ -9,7 +9,7 @@ from models.model.abstract_model import AbstractModel
 from models.incremental_model.abstract_incremental_model import AbstractIncrementalModel
 
 
-class HumanControlledAgent:
+class HumanDrivenAgent:
     """ A class for interactive testing where humans can give commands to the agent.
     TODO: Currently only supports nav_drone. Extend it to other types of agents.
     """

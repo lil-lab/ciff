@@ -5,18 +5,13 @@ import sys
 import traceback
 import utils.generic_policy as gp
 
-from agents.human_controlled_agent import HumanControlledAgent
+from agents.human_controlled_agent import HumanDrivenAgent
 from dataset_agreement_nav_drone.action_space import ActionSpace
 from dataset_agreement_nav_drone.metadata_util import MetaDataUtil
 from dataset_agreement_nav_drone.nav_drone_dataset_parser import DatasetParser
 from models.incremental_model.incremental_model_chaplot import IncrementalModelChaplot
-from models.incremental_model.incremental_model_recurrent_policy_network_only_symbolic_text import\
-    IncrementalModelRecurrentPolicyNetworkSymbolicTextResnet
-from models.incremental_model.incremental_model_recurrent_policy_network_resnet import \
-    IncrementalModelRecurrentPolicyNetworkResnet
 from server_nav_drone.nav_drone_server_py3 import NavDroneServerPy3
-from setup_agreement_nav_drone.validate_setup_nav_drone import \
-    NavDroneSetupValidator
+from setup_agreement_nav_drone.validate_setup_nav_drone import NavDroneSetupValidator
 from utils.tensorboard import Tensorboard
 
 experiment = "./results/interactive_agent_policy"
@@ -70,39 +65,25 @@ try:
     logging.log(logging.DEBUG, "CREATING MODEL")
     model = IncrementalModelChaplot(config, constants)
     model.load_saved_model(
-        "./results/asynchronous_contextual_bandit_chaplot_model_horizon45_entropy0.1/contextual_bandit_5_epoch_4")
+        "./results/model-folder-name/contextual_bandit_5_epoch_4")
     logging.log(logging.DEBUG, "MODEL CREATED")
 
     # Create the agent
     logging.log(logging.DEBUG, "STARTING AGENT")
-    agent = HumanControlledAgent(server=server,
-                  model=model,
-                  test_policy=test_policy,
-                  action_space=action_space,
-                  meta_data_util=meta_data_util,
-                  config=config,
-                  constants=constants)
+    agent = HumanDrivenAgent(server=server,
+                             model=model,
+                             test_policy=test_policy,
+                             action_space=action_space,
+                             meta_data_util=meta_data_util,
+                             config=config,
+                             constants=constants)
 
     # create tensorboard
-    tensorboard = Tensorboard("dummy")
+    tensorboard = Tensorboard("Human-Driven-Agent")
 
-    # Read the dataset
-    # test_dataset = DatasetParser.parse("data/nav_drone/synthetic_dev_annotations_4000.json", config)
-    # logging.info("Created test dataset of size %d ", len(test_dataset))
+    dev_dataset = DatasetParser.parse("data/nav_drone/dev_annotations_6000.json", config)
 
-    ############################
-    all_train_data = DatasetParser.parse("data/nav_drone/train_annotations_4000.json", config)
-    num_train = (len(all_train_data) * 19) // 20
-    while all_train_data[num_train].get_scene_name().split("_")[1] == \
-            all_train_data[num_train - 1].get_scene_name().split("_")[1]:
-        num_train += 1
-    train_split = all_train_data[:num_train]
-    tune_split = all_train_data[num_train:]
-    agent.test(tune_split, tensorboard)
-    ############################
-
-    # test on this dataset
-    # agent.test(test_dataset, tensorboard)
+    agent.test(dev_dataset, tensorboard)
 
     server.kill()
 
