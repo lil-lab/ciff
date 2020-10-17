@@ -7,10 +7,10 @@ API_TOKEN = None
 
 class PushoverLogger(object):
     def __init__(self, experiment_name):
-        return
+        return # Comment out if using pushover
         self.experiment_name = experiment_name
-        andrew_client = Client(ANDREW_CLIENT_TOKEN, api_token=ANDREW_API_TOKEN)
-        self.clients = [andrew_client]
+        client = Client(CLIENT_TOKEN, api_token=API_TOKEN)
+        self.clients = [client]
 
     def log(self, message):
         return
