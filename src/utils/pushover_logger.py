@@ -1,8 +1,8 @@
 # from pushover import Client
 
 
-ANDREW_CLIENT_TOKEN = None
-ANDREW_API_TOKEN = None
+CLIENT_TOKEN = None
+API_TOKEN = None
 
 
 class PushoverLogger(object):
