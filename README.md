@@ -63,8 +63,17 @@ Publications using models, data or simulators provided with CIFF.
 2) Download the data and simulators file from http://clic.nlp.cornell.edu/resources/Misra-EMNLP-2018/. Note that images for Touchdown dataset are not available publically since Google owns these images. We do however provide image features. Please see the Section 9 in the Touchdown paper for full details. Place the data and simulator files in the same ciff folder alongside the src folder. The CIFF directory should contain 4 folders: src, simulators, data and media.
      
 3) Set PYTHONENV to treat the src folder as root. One way to do this is to run:
+   1) For Linux
  
-   `export PYTHONPATH=$PYTHONPATH:./src/`
+      `export PYTHONPATH=$PYTHONPATH:./src/`
+
+   2) For windows Powershell, assuming you have a system variable named PYTHONPATH
+      
+      `$Env:PYTHONPATH=$Env:PYTHONPATH+";.\src\"`
+
+   If no system variable with the name `PYTHONPATH` exists, you can use your python path. For example, if it is located at `C:\Python38\`, then the command will be 
+
+   3) `$Env:PYTHONPATH="C:\Python38\;.\src\"`
 
 4) Run an experiment. This is essentially done by running a file as:
 
